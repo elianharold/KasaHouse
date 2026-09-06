@@ -11,8 +11,13 @@
 **/.env.*
 !**/.env.example
 
-# the mobile app is not part of the API image
-apps/mobile
+# the client apps are not part of the API image (their manifests are copied
+# explicitly by the Dockerfile for lockfile validation)
+apps/mobile/src
+apps/mobile/app
+apps/mobile/assets
+apps/web/src
+apps/web/public
 
 # vcs / editor / ci
 .git

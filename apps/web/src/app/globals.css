@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* KasaHouse design tokens — kept in sync with apps/mobile/src/theme/tokens.ts */
+@theme {
+  --color-brand: #0b7a4b;
+  --color-brand-dark: #085c39;
+  --color-brand-light: #e6f4ec;
+  --color-accent: #f2a104;
+
+  --color-ink: #12211b;
+  --color-ink-muted: #5b6b63;
+  --color-ink-faint: #9aa8a1;
+
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f4f6f5;
+  --color-line: #e2e8e4;
+  --color-danger: #c0392b;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Consistent focus ring for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}

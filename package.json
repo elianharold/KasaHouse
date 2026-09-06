@@ -11,6 +11,8 @@
     "build:types": "pnpm --filter @kasahouse/shared-types build",
     "dev:backend": "pnpm --filter @kasahouse/backend start:dev",
     "dev:mobile": "pnpm --filter @kasahouse/mobile start",
+    "dev:web": "pnpm --filter @kasahouse/web dev",
+    "build:web": "pnpm --filter @kasahouse/web build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "prisma:generate": "pnpm --filter @kasahouse/backend prisma:generate",

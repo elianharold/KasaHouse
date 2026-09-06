@@ -9,8 +9,15 @@ This repository is a **pnpm monorepo**:
 | Package | Path | Stack |
 | --- | --- | --- |
 | `@kasahouse/mobile` | `apps/mobile` | Expo (SDK 57) · Expo Router · React Native 0.81 · NativeWind · TanStack Query · Zustand · react-hook-form + zod |
+| `@kasahouse/web` | `apps/web` | Next.js 16 (App Router) · Tailwind v4 · TanStack Query · Zustand · react-hook-form + zod — SSR listing pages for SEO, deploys to Vercel |
 | `@kasahouse/backend` | `apps/backend` | NestJS 12 · Prisma 6 · PostgreSQL · Passport JWT · Cloudinary · Africa's Talking |
-| `@kasahouse/shared-types` | `packages/shared-types` | Framework-agnostic TypeScript types shared by both apps (API shapes, enums, route constants) |
+| `@kasahouse/shared-types` | `packages/shared-types` | Framework-agnostic TypeScript types shared by all three apps (API shapes, enums, route constants) |
+
+```
+  Mobile (Expo)  ─┐
+  Web (Next.js)  ─┼─▶  NestJS API (Railway)  ─▶  Neon Postgres
+                  ┘         the web & mobile apps never touch Postgres directly
+```
 
 ---
 
@@ -19,10 +26,12 @@ This repository is a **pnpm monorepo**:
 The product is built in deliberate phases (see the original brief). **This
 codebase currently implements Phase 1.**
 
-1. **Phase 1 — DONE.** Phone-OTP auth, roles, listings (create / browse / search
-   / detail / edit / publish), media upload pipeline (Cloudinary, signed direct
-   upload with on-device compression), and the full
+1. **Phase 1 — DONE (backend + mobile + web).** Phone-OTP auth, roles, listings
+   (create / browse / search / detail / edit / publish), media upload pipeline
+   (Cloudinary, signed direct upload with client-side compression), and the full
    page → hook → service → API / controller → service → repository scaffolding.
+   The web app mirrors the mobile app feature-for-feature and adds SSR + SEO
+   metadata on the public browse/listing pages.
 2. Phase 2 — Ghana Card KYC (Smile ID) + in-app chat with off-platform-payment flagging.
 3. Phase 3 — Flutterwave payments behind a `PaymentProvider` abstraction, split payments, internal reconciliation ledger.
 4. Phase 4 — Lease/sale agreement e-signature flow.
@@ -87,7 +96,13 @@ pnpm dev:backend
 
 # Terminal 2 — Expo dev server
 pnpm dev:mobile      # then press "a" (Android), "i" (iOS), or scan the QR in Expo Go
+
+# Terminal 3 — Next.js web app (http://localhost:3000)
+pnpm dev:web
 ```
+
+The web app reads `apps/web/.env.local` (`NEXT_PUBLIC_API_BASE_URL`). The
+backend's `CORS_ORIGINS` already includes `http://localhost:3000`.
 
 Sign-in flow in development: enter any valid Ghana number (e.g. `0201110001`),
 then the 6-digit code — in `console` SMS mode the code is printed in the API logs
@@ -127,6 +142,25 @@ Create a free project at [neon.tech](https://neon.tech). From the project's
 
 Both end with `?sslmode=require`. The running API uses the pooled URL;
 `prisma migrate` uses the direct one (`directUrl` in `schema.prisma`).
+
+### Web — Vercel
+
+Import the repo as a Vercel project and set:
+
+| Setting | Value |
+| --- | --- |
+| **Root Directory** | `apps/web` |
+| **Framework Preset** | Next.js (auto-detected) |
+| **Environment Variable** | `NEXT_PUBLIC_API_BASE_URL` = `https://<railway-app>.up.railway.app/api/v1` |
+| **Environment Variable** | `NEXT_PUBLIC_SITE_URL` = `https://<your-vercel-domain>` |
+| **Environment Variable** | `ENABLE_EXPERIMENTAL_COREPACK` = `1` — needed so Vercel honours `packageManager: pnpm@12` (avoids the "pnpm wrapper missing" build error) |
+
+Vercel detects `pnpm-workspace.yaml` at the repo root and installs the whole
+workspace, then builds only `apps/web`. If corepack still fails, override the
+**Install Command** to `npm i -g pnpm@12.3.4 && pnpm install`.
+
+The Neon database env vars Vercel auto-injects are **not used** by the web app —
+it only talks to the API.
 
 ### API — Railway or Render (Docker)
 
@@ -206,6 +240,8 @@ proxies file bytes. Cloudinary is optional in Phase 1 — media endpoints return
   maps every route, and connects to Postgres when `DATABASE_URL` is reachable.
 - `apps/mobile` → `expo export` bundles for iOS and Android; `expo-doctor` passes
   21/21; `expo start` serves the app to Expo Go / emulators.
+- `apps/web` → `next build` compiles and prerenders; `pnpm dev:web` serves it at
+  `http://localhost:3000`.
 
 The one thing that needs your environment: a running PostgreSQL. Everything else
 is wired.

@@ -22,6 +22,7 @@ WORKDIR /repo
 FROM base AS build
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.base.json ./
 COPY apps/mobile/package.json ./apps/mobile/
+COPY apps/web/package.json ./apps/web/
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/shared-types ./packages/shared-types
 COPY apps/backend/prisma ./apps/backend/prisma
