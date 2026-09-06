@@ -1,0 +1,26 @@
+# This file applies when the build context is the repo root.
+**/node_modules
+**/dist
+**/.expo
+**/.expo-shared
+**/web-build
+**/*.tsbuildinfo
+
+# never bake secrets into an image
+**/.env
+**/.env.*
+!**/.env.example
+
+# the mobile app is not part of the API image
+apps/mobile
+
+# vcs / editor / ci
+.git
+.github
+.idea
+.vscode
+**/*.log
+
+# docs & local-only
+*.md
+!README.md

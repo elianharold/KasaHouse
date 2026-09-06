@@ -1,0 +1,16 @@
+import { Stack } from 'expo-router';
+
+export default function AuthLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: '#FFFFFF' },
+      }}
+    >
+      <Stack.Screen name="phone" />
+      <Stack.Screen name="verify" />
+      <Stack.Screen name="role" />
+    </Stack>
+  );
+}

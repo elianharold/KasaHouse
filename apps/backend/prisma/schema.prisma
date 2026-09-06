@@ -1,0 +1,185 @@
+// KasaHouse — Prisma schema (Phase 1: users, auth challenges, listings, media)
+// Engine: PostgreSQL. Money is stored in pesewas (Int), currency is always GHS.
+
+generator client {
+  provider = "prisma-client-js"
+  // "native" covers local dev; the Debian target covers the Docker image used
+  // on Railway / Render (node:22-slim → debian-openssl-3.0.x).
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  // Pooled connection (Neon "-pooler" host) — used by the running API.
+  url = env("DATABASE_URL")
+  // Direct connection — used by `prisma migrate` / `prisma db push`.
+  // With a non-Neon local Postgres, set DIRECT_URL to the same value as DATABASE_URL.
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────── Users ───────────────────────────
+
+enum UserRole {
+  LANDLORD
+  TENANT
+}
+
+enum KycStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model User {
+  id        String     @id @default(cuid())
+  phone     String     @unique // E.164, e.g. +233201234567
+  fullName  String?
+  roles     UserRole[] @default([])
+  kycStatus KycStatus  @default(UNVERIFIED)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings      Listing[]
+  otpChallenges OtpChallenge[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+// ─────────────────── Auth: OTP + refresh tokens ───────────────────
+
+model OtpChallenge {
+  id String @id @default(cuid())
+
+  phone      String
+  codeHash   String // sha256(code + pepper) — the plain code is never stored
+  role       UserRole? // chosen at request time for brand-new phones
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  lockedAt   DateTime?
+
+  // Present once the phone resolves to an account (may be null for a new signup).
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([phone, createdAt])
+  @@map("otp_challenges")
+}
+
+model RefreshToken {
+  id String @id @default(cuid())
+
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique // sha256 of the opaque refresh token
+  expiresAt DateTime
+  revokedAt DateTime?
+  // Rotation chain: the token that replaced this one.
+  replacedById String? @unique
+
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ────────────────────────── Listings ──────────────────────────
+
+enum ListingPurpose {
+  RENT
+  SALE
+}
+
+enum PropertyType {
+  SINGLE_ROOM
+  CHAMBER_AND_HALL
+  APARTMENT
+  HOUSE
+  SERVICED_APARTMENT
+  COMMERCIAL
+  LAND
+}
+
+enum RentPeriod {
+  MONTH
+  YEAR
+}
+
+enum ListingStatus {
+  DRAFT
+  PUBLISHED
+  UNLISTED
+  TAKEN
+}
+
+model Listing {
+  id      String @id @default(cuid())
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  purpose      ListingPurpose
+  propertyType PropertyType
+  title        String
+  description  String
+  price        Int // pesewas, GHS
+  rentPeriod   RentPeriod?
+  advanceMonths Int?
+  bedrooms     Int?
+  bathrooms    Int?
+
+  region    String
+  city      String
+  area      String
+  landmark  String?
+  latitude  Float?
+  longitude Float?
+
+  requirements String[] @default([])
+  // Add-ons stored as JSON array of { label: string, price: number | null }.
+  addOns Json @default("[]")
+
+  status      ListingStatus @default(DRAFT)
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  media Media[]
+
+  @@index([status, createdAt])
+  @@index([purpose, propertyType, status])
+  @@index([city, area])
+  @@index([ownerId])
+  @@map("listings")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model Media {
+  id        String  @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  type            MediaType
+  url             String
+  thumbnailUrl    String
+  storageKey      String // Cloudinary public_id
+  width           Int?
+  height          Int?
+  durationSeconds Int?
+  order           Int    @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([listingId, order])
+  @@map("media")
+}

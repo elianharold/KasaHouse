@@ -1,0 +1,39 @@
+node_modules/
+dist/
+build/
+.expo/
+.expo-shared/
+web-build/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+
+# prisma
+apps/backend/prisma/*.db
+
+# logs
+*.log
+npm-debug.*
+pnpm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+android/
+ios/

@@ -1,0 +1,62 @@
+# Render Blueprint — deploys the KasaHouse API as a Docker web service.
+# Create the Neon database separately, then paste DATABASE_URL / DIRECT_URL into
+# the service's environment on first deploy (they are marked sync:false).
+services:
+  - type: web
+    name: kasahouse-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./apps/backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render injects PORT; main.ts reads it. Do not hardcode.
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_TTL
+        value: "900"
+      - key: JWT_REFRESH_TTL
+        value: "2592000"
+      - key: OTP_LENGTH
+        value: "6"
+      - key: OTP_TTL_SECONDS
+        value: "300"
+      - key: OTP_RESEND_COOLDOWN_SECONDS
+        value: "45"
+      - key: OTP_MAX_VERIFY_ATTEMPTS
+        value: "5"
+      # Switch to "africastalking" and fill AT_* once a sender ID is approved.
+      - key: SMS_PROVIDER
+        value: console
+      - key: AT_USERNAME
+        sync: false
+      - key: AT_API_KEY
+        sync: false
+      - key: AT_SENDER_ID
+        sync: false
+      - key: AT_ENV
+        value: sandbox
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_IMAGE_PRESET
+        value: kasahouse_listing_image
+      - key: CLOUDINARY_VIDEO_PRESET
+        value: kasahouse_listing_video
+      - key: SENTRY_DSN
+        sync: false

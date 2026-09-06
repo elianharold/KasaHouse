@@ -1,0 +1,20 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# React Native / Metro need a flat node_modules tree; pnpm's default symlinked
+# layout breaks Metro resolution and some Expo config plugins.
+nodeLinker: hoisted
+dedupePeerDependents: false
+enablePrePostScripts: true
+
+# pnpm 10+ requires build scripts to be explicitly allowed.
+allowBuilds:
+  "@prisma/engines": true
+  prisma: true
+  "@prisma/client": true
+  esbuild: true
+  "@sentry/cli": true
+  "@nestjs/core": true
+  unrs-resolver: true
+  sharp: true
