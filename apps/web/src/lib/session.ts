@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie';
 import type { AuthTokens, User } from '@kasahouse/shared-types';
+import { COOKIE } from './session-constants';
 
 /**
  * Web session storage. Tokens live in cookies so Next.js middleware and server
@@ -9,12 +10,7 @@ import type { AuthTokens, User } from '@kasahouse/shared-types';
  * this first cut but a hardening follow-up should move the refresh token behind
  * an httpOnly cookie set by a Next route handler.
  */
-export const COOKIE = {
-  access: 'kh_at',
-  refresh: 'kh_rt',
-  user: 'kh_user',
-  authed: 'kh_authed', // lightweight flag middleware checks
-} as const;
+export { COOKIE };
 
 const baseOptions: Cookies.CookieAttributes = {
   sameSite: 'lax',

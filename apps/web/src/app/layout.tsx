@@ -6,7 +6,7 @@ import { SiteHeader } from '@/components/layout/SiteHeader';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(env.siteUrl),
+  metadataBase: env.siteUrlObject,
   title: {
     default: 'KasaHouse — rent or buy directly from owners in Ghana',
     template: '%s · KasaHouse',

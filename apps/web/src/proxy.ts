@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { COOKIE } from '@/lib/session';
+import { COOKIE } from '@/lib/session-constants';
 
 const PROTECTED = ['/dashboard', '/profile'];
 

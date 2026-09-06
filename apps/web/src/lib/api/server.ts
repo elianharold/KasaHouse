@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { API_ROUTES, type ApiErrorBody } from '@kasahouse/shared-types';
 import { env } from '@/lib/env';
 import { ApiError } from '@/lib/api-error';
-import { COOKIE } from '@/lib/session';
+import { COOKIE } from '@/lib/session-constants';
 
 interface ServerFetchOptions {
   /** Attach the caller's access token cookie as a Bearer header. */
@@ -30,10 +30,8 @@ export async function serverFetch<T>(
 
   const res = await fetch(`${env.apiBaseUrl}${path}`, {
     headers,
-    next:
-      revalidate === false
-        ? { revalidate: 0, tags }
-        : { revalidate, tags },
+    signal: AbortSignal.timeout(10_000),
+    next: revalidate === false ? { revalidate: 0, tags } : { revalidate, tags },
   });
 
   if (!res.ok) {
