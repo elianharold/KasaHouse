@@ -154,13 +154,16 @@ Import the repo as a Vercel project and set:
 | Env: `NEXT_PUBLIC_API_BASE_URL` | `https://<railway-app>.up.railway.app/api/v1` |
 | Env: `NEXT_PUBLIC_SITE_URL` | `https://<your-vercel-domain>` |
 
-`apps/web/vercel.json` handles the install: it installs pnpm 12 via plain `npm`
-(bypassing Vercel's corepack pnpm wrapper, which is currently broken for pnpm
-12.3.x — the "installed pnpm wrapper is missing" error), then runs a frozen
-workspace install and builds only `@kasahouse/web`.
+The repo intentionally has **no `packageManager` field** in the root
+`package.json` — that field makes Vercel bootstrap pnpm through a wrapper that is
+currently broken for pnpm 12.3.x ("the installed pnpm wrapper is missing").
+Without it, Vercel uses its built-in pnpm (v9, compatible with our lockfile v9).
+Cross-version install settings live in the root `.npmrc` (`node-linker=hoisted`
+etc.) so pnpm 9 and pnpm 12 install identically. `apps/web/vercel.json` then
+scopes the install/build to `@kasahouse/web`.
 
-As a second layer you can also add env `ENABLE_EXPERIMENTAL_COREPACK=1`, but with
-`vercel.json` in place it should not be needed.
+Local dev and the Railway Docker build pin pnpm explicitly (global install /
+`corepack prepare` in the Dockerfile), so dropping the field doesn't affect them.
 
 The Neon database env vars Vercel auto-injects are **not used** by the web app —
 it only talks to the API.
