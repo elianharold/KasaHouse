@@ -149,15 +149,18 @@ Import the repo as a Vercel project and set:
 
 | Setting | Value |
 | --- | --- |
-| **Root Directory** | `apps/web` |
+| **Root Directory** | `apps/web` &nbsp;— **required** |
 | **Framework Preset** | Next.js (auto-detected) |
-| **Environment Variable** | `NEXT_PUBLIC_API_BASE_URL` = `https://<railway-app>.up.railway.app/api/v1` |
-| **Environment Variable** | `NEXT_PUBLIC_SITE_URL` = `https://<your-vercel-domain>` |
-| **Environment Variable** | `ENABLE_EXPERIMENTAL_COREPACK` = `1` — needed so Vercel honours `packageManager: pnpm@12` (avoids the "pnpm wrapper missing" build error) |
+| Env: `NEXT_PUBLIC_API_BASE_URL` | `https://<railway-app>.up.railway.app/api/v1` |
+| Env: `NEXT_PUBLIC_SITE_URL` | `https://<your-vercel-domain>` |
 
-Vercel detects `pnpm-workspace.yaml` at the repo root and installs the whole
-workspace, then builds only `apps/web`. If corepack still fails, override the
-**Install Command** to `npm i -g pnpm@12.3.4 && pnpm install`.
+`apps/web/vercel.json` handles the install: it installs pnpm 12 via plain `npm`
+(bypassing Vercel's corepack pnpm wrapper, which is currently broken for pnpm
+12.3.x — the "installed pnpm wrapper is missing" error), then runs a frozen
+workspace install and builds only `@kasahouse/web`.
+
+As a second layer you can also add env `ENABLE_EXPERIMENTAL_COREPACK=1`, but with
+`vercel.json` in place it should not be needed.
 
 The Neon database env vars Vercel auto-injects are **not used** by the web app —
 it only talks to the API.
