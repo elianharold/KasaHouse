@@ -55,3 +55,37 @@ export const relativeTime = (iso: string): string => {
 
 export const bedroomLabel = (n: number | null): string | null =>
   n == null ? null : n === 0 ? 'Studio' : `${n} bed${n === 1 ? '' : 's'}`;
+
+export const messageTime = (iso: string): string => {
+  const d = new Date(iso);
+  let h = d.getHours();
+  const m = d.getMinutes().toString().padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${m} ${ampm}`;
+};
+
+export const sameDay = (a: string, b: string): boolean => {
+  const x = new Date(a);
+  const y = new Date(b);
+  return (
+    x.getFullYear() === y.getFullYear() &&
+    x.getMonth() === y.getMonth() &&
+    x.getDate() === y.getDate()
+  );
+};
+
+export const dayLabel = (iso: string): string => {
+  const d = new Date(iso);
+  const now = new Date();
+  const startOf = (x: Date) =>
+    new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((startOf(now) - startOf(d)) / 86_400_000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Yesterday';
+  return d.toLocaleDateString('en-GH', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  });
+};

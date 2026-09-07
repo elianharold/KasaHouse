@@ -50,3 +50,33 @@ export const relativeTime = (iso: string): string => {
   const months = Math.round(days / 30);
   return months < 12 ? `${months}mo ago` : `${Math.round(months / 12)}y ago`;
 };
+
+const timeFmt = new Intl.DateTimeFormat('en-GH', { hour: 'numeric', minute: '2-digit' });
+
+/** "3:45 PM" */
+export const messageTime = (iso: string): string => timeFmt.format(new Date(iso));
+
+/** "Today" / "Yesterday" / "Fri 5 Sep" — a day divider label. */
+export const dayLabel = (iso: string): string => {
+  const d = new Date(iso);
+  const today = new Date();
+  const startOf = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diffDays = Math.round((startOf(today) - startOf(d)) / 86_400_000);
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  return new Intl.DateTimeFormat('en-GH', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  }).format(d);
+};
+
+export const sameDay = (a: string, b: string): boolean => {
+  const x = new Date(a);
+  const y = new Date(b);
+  return (
+    x.getFullYear() === y.getFullYear() &&
+    x.getMonth() === y.getMonth() &&
+    x.getDate() === y.getDate()
+  );
+};
