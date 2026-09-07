@@ -11,10 +11,11 @@ generator client {
 datasource db {
   provider = "postgresql"
   // Pooled connection (Neon "-pooler" host) — used by the running API.
+  // These names match what Vercel's Neon integration injects.
   url = env("DATABASE_URL")
-  // Direct connection — used by `prisma migrate` / `prisma db push`.
-  // With a non-Neon local Postgres, set DIRECT_URL to the same value as DATABASE_URL.
-  directUrl = env("DIRECT_URL")
+  // Direct (unpooled) connection — used by `prisma migrate` only.
+  // For a plain local Postgres, set DATABASE_URL_UNPOOLED to the same value as DATABASE_URL.
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 // ─────────────────────────── Users ───────────────────────────

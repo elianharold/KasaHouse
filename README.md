@@ -186,8 +186,8 @@ Second Vercel project (or the one you already pointed at the backend):
 | --- | --- |
 | **Root Directory** | `apps/backend` |
 | **Framework Preset** | Other |
-| Env: `DATABASE_URL` | Neon **pooled** string (`-pooler` host) — used by the running function |
-| Env: `DIRECT_URL` | Neon **direct** string — used by `prisma migrate deploy` in the build |
+| Env: `DATABASE_URL` | injected by the Neon integration — pooled, used by the running function |
+| Env: `DATABASE_URL_UNPOOLED` | injected by the Neon integration — direct, used by `prisma migrate deploy` in the build |
 | Env: `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | two different 32+ char secrets |
 | Env: `CORS_ORIGINS` | your web app's Vercel URL, comma-separated |
 | Env: `SMS_PROVIDER` | `console` for now |
@@ -200,14 +200,14 @@ with `outputDirectory: "dist"` so Vercel finds the compiled `dist/main.js`.
 No `api/` directory, no rewrites. `GET /api/v1/health` returns
 `{"status":"ok","db":"up"}` once `DATABASE_URL` points at a live DB.
 
-**Migrations are not run by the Vercel build** (a build shouldn't depend on the
-DB being reachable). Run them once from your machine with the Neon strings in
-your env:
+**Migrations run automatically on every Vercel deploy** — `vercel-build` is
+`prisma migrate deploy && prisma generate && nest build`, using the
+`DATABASE_URL_UNPOOLED` var the Neon integration already injects. To seed demo
+listings, run once from your machine with the Neon strings:
 
 ```bash
 cd apps/backend
-DATABASE_URL="<neon-pooled>" DIRECT_URL="<neon-direct>" pnpm exec prisma migrate deploy
-DATABASE_URL="<neon-pooled>" DIRECT_URL="<neon-direct>" pnpm exec ts-node prisma/seed.ts   # optional demo data
+DATABASE_URL="<pooled>" DATABASE_URL_UNPOOLED="<direct>" pnpm exec ts-node prisma/seed.ts
 ```
 
 > Phase 2's in-app chat needs WebSockets, which Vercel functions don't support —
