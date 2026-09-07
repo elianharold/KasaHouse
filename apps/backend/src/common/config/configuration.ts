@@ -51,11 +51,24 @@ const list = (value: string | undefined): string[] =>
     .map((entry) => entry.trim())
     .filter(Boolean);
 
+/**
+ * The pooled Postgres connection string. Prefer DATABASE_URL, but also accept
+ * the names Vercel's Neon integration injects so the app works without having
+ * to hand-copy a variable.
+ */
+const resolveDatabaseUrl = (): string =>
+  process.env.DATABASE_URL ||
+  process.env.DATABASE_POSTGRES_PRISMA_URL ||
+  process.env.POSTGRES_PRISMA_URL ||
+  process.env.DATABASE_POSTGRES_URL ||
+  process.env.POSTGRES_URL ||
+  '';
+
 export const loadConfiguration = (): AppConfig => ({
   nodeEnv: (process.env.NODE_ENV as AppConfig['nodeEnv']) || 'development',
   port: int(process.env.PORT, 4000),
   corsOrigins: list(process.env.CORS_ORIGINS),
-  databaseUrl: process.env.DATABASE_URL ?? '',
+  databaseUrl: resolveDatabaseUrl(),
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET ?? '',
     refreshSecret: process.env.JWT_REFRESH_SECRET ?? '',

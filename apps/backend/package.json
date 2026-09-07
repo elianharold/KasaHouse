@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "KasaHouse API — NestJS (controller → service → repository)",
+  "main": "dist/main.js",
   "scripts": {
     "postinstall": "prisma generate",
     "build": "prisma generate && nest build",
