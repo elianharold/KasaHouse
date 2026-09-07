@@ -192,10 +192,21 @@ Second Vercel project (or the one you already pointed at the backend):
 | Env: `CORS_ORIGINS` | your web app's Vercel URL, comma-separated |
 | Env: `SMS_PROVIDER` | `console` for now |
 
-`apps/backend/vercel.json` runs `prisma migrate deploy && prisma generate &&
-nest build`, then serves `api/index.js` (which boots Nest once per cold start
-and hands requests to its Express instance) for every route. `GET /api/v1/health`
-should return `{"status":"ok","db":"up"}` once `DATABASE_URL` points at a live DB.
+`apps/backend/vercel.json` runs `prisma generate && nest build`, then every
+`/api/...` request is served by the catch-all function `api/[...path].js` (which
+boots Nest once per cold start and hands the request — original URL intact — to
+its Express instance). `GET /api/v1/health` returns
+`{"status":"ok","db":"up"}` once `DATABASE_URL` points at a live DB.
+
+**Migrations are not run by the Vercel build** (a build shouldn't depend on the
+DB being reachable). Run them once from your machine with the Neon strings in
+your env:
+
+```bash
+cd apps/backend
+DATABASE_URL="<neon-pooled>" DIRECT_URL="<neon-direct>" pnpm exec prisma migrate deploy
+DATABASE_URL="<neon-pooled>" DIRECT_URL="<neon-direct>" pnpm exec ts-node prisma/seed.ts   # optional demo data
+```
 
 > Phase 2's in-app chat needs WebSockets, which Vercel functions don't support —
 > at that point the realtime piece moves to a managed service (or the whole API

@@ -1,6 +1,11 @@
 /**
  * Vercel serverless entrypoint for the KasaHouse API.
  *
+ * Catch-all filename (`api/[...path].js`) so every `/api/...` request hits this
+ * one function with its ORIGINAL url intact — no `vercel.json` rewrite, which
+ * on "backend framework" projects now rewrites req.url to the destination path
+ * and would break Express/Nest routing.
+ *
  * Plain JS (not TS) on purpose: it `require()`s the output of `nest build`
  * (`dist/`), which tsc compiles with full `emitDecoratorMetadata` — Vercel's
  * esbuild-based TS compiler does NOT emit that metadata, so compiling the Nest
