@@ -7,6 +7,7 @@ import { TextField } from '../../src/components/ui/TextField';
 import { KycBadge } from '../../src/components/ui/Badge';
 import { LoadingState } from '../../src/components/ui/StateViews';
 import {
+  useDeleteAccount,
   useLogout,
   useSession,
   useSetPassword,
@@ -27,6 +28,7 @@ export default function ProfileScreen() {
   const { user, hydrated, isLandlord, isTenant } = useSession();
   const updateProfile = useUpdateProfile();
   const setPasswordMut = useSetPassword();
+  const deleteAccount = useDeleteAccount();
   const logout = useLogout();
 
   const [name, setName] = useState(user?.fullName ?? '');
@@ -222,6 +224,37 @@ export default function ProfileScreen() {
               { text: 'Cancel', style: 'cancel' },
               { text: 'Sign out', style: 'destructive', onPress: () => void logout() },
             ]);
+          }}
+        />
+      </View>
+
+      <View className="mt-8 rounded-2xl border border-danger/30 bg-[#FBE9E7]/40 p-4">
+        <Text className="text-sm font-semibold text-danger">Delete account</Text>
+        <Text className="mb-3 mt-1 text-xs text-ink-muted">
+          Permanently removes your account, your listings and their photos. This
+          cannot be undone.
+        </Text>
+        <Button
+          label="Delete my account"
+          variant="danger"
+          loading={deleteAccount.isPending}
+          onPress={() => {
+            Alert.alert(
+              'Delete account?',
+              'This permanently deletes your account, listings and photos. This cannot be undone.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Delete permanently',
+                  style: 'destructive',
+                  onPress: () =>
+                    deleteAccount.mutate(undefined, {
+                      onError: (e) =>
+                        Alert.alert('Could not delete', toApiError(e).message),
+                    }),
+                },
+              ],
+            );
           }}
         />
       </View>

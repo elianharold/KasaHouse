@@ -17,6 +17,7 @@ export const API_ROUTES = {
   users: {
     me: '/users/me',
     updateMe: '/users/me',
+    deleteMe: '/users/me',
     publicProfile: (userId: string) => `/users/${userId}/public`,
   },
   listings: {

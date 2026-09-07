@@ -1,13 +1,39 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { PublicUserProfile, User, UserRole } from '@kasahouse/shared-types';
 import { DomainException } from '../../common/errors/domain.exception';
 import { normalizeEmail } from '../../common/utils/email';
+import { MediaService } from '../media/media.service';
 import { UsersRepository } from './users.repository';
 import { toPublicUserProfile, toUser } from './user.mapper';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly repo: UsersRepository) {}
+  private readonly logger = new Logger(UsersService.name);
+
+  constructor(
+    private readonly repo: UsersRepository,
+    private readonly media: MediaService,
+  ) {}
+
+  /**
+   * Permanently delete the account. Prisma cascades remove the user's listings,
+   * their media rows, and refresh tokens; Cloudinary assets are cleaned up
+   * best-effort first.
+   */
+  async deleteMe(userId: string): Promise<void> {
+    const user = await this.repo.findById(userId);
+    if (!user) throw new NotFoundException('Account not found');
+
+    await this.media.purgeForOwner(userId).catch((error) => {
+      this.logger.error(
+        `Cloudinary cleanup failed while deleting user ${userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    });
+
+    await this.repo.delete(userId);
+    this.logger.log(`Account ${userId} deleted`);
+  }
 
   async getMe(userId: string): Promise<User> {
     const row = await this.repo.findById(userId);

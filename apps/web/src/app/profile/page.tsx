@@ -9,6 +9,7 @@ import { Field, Input } from '@/components/ui/Field';
 import { KycBadge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/States';
 import {
+  useDeleteAccount,
   useLogout,
   useMe,
   useSession,
@@ -22,6 +23,7 @@ export default function ProfilePage() {
   const { hydrated, isAuthenticated, user, isLandlord, isTenant } = useSession();
   const updateProfile = useUpdateProfile();
   const setPasswordMut = useSetPassword();
+  const deleteAccount = useDeleteAccount();
   const logout = useLogout();
   useMe();
 
@@ -30,6 +32,8 @@ export default function ProfilePage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [banner, setBanner] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
 
   useEffect(() => {
     if (hydrated && !isAuthenticated) router.replace('/sign-in?next=/profile');
@@ -207,6 +211,65 @@ export default function ProfilePage() {
         <Button variant="ghost" onClick={() => void logout()}>
           Sign out
         </Button>
+      </div>
+
+      <div className="mt-10 rounded-2xl border border-danger/30 bg-red-50/40 p-4">
+        <h2 className="text-sm font-semibold text-danger">Delete account</h2>
+        <p className="mt-1 text-xs text-ink-muted">
+          Permanently removes your account, your listings and their photos. This
+          cannot be undone.
+        </p>
+
+        {!showDelete ? (
+          <Button
+            variant="danger"
+            size="sm"
+            className="mt-3"
+            onClick={() => setShowDelete(true)}
+          >
+            Delete my account
+          </Button>
+        ) : (
+          <div className="mt-3">
+            <Field label='Type "DELETE" to confirm'>
+              {(id) => (
+                <Input
+                  id={id}
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                  placeholder="DELETE"
+                  autoFocus
+                />
+              )}
+            </Field>
+            <div className="flex gap-2">
+              <Button
+                variant="danger"
+                size="sm"
+                loading={deleteAccount.isPending}
+                disabled={deleteConfirm.trim() !== 'DELETE'}
+                onClick={() => deleteAccount.mutate()}
+              >
+                Delete permanently
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowDelete(false);
+                  setDeleteConfirm('');
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+            {deleteAccount.isError ? (
+              <p className="mt-2 text-xs text-danger">
+                {toApiError(deleteAccount.error).message}
+              </p>
+            ) : null}
+          </div>
+        )}
       </div>
     </Container>
   );

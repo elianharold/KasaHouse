@@ -19,6 +19,19 @@ export class MediaService {
     private readonly cloudinary: CloudinaryService,
   ) {}
 
+  /** Best-effort deletion of every Cloudinary asset owned by a user. */
+  async purgeForOwner(ownerId: string): Promise<void> {
+    const media = await this.repo.listByOwner(ownerId);
+    await Promise.allSettled(
+      media.map((m) =>
+        this.cloudinary.destroy(
+          m.storageKey,
+          m.type === MediaType.VIDEO ? 'video' : 'image',
+        ),
+      ),
+    );
+  }
+
   async createUploadSignature(
     userId: string,
     input: { listingId: string; resourceType: 'image' | 'video' },

@@ -24,4 +24,9 @@ export class UsersRepository {
   update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
     return this.prisma.user.update({ where: { id }, data });
   }
+
+  /** Cascades to the user's listings, media rows, refresh tokens; nulls OTP links. */
+  delete(id: string): Promise<User> {
+    return this.prisma.user.delete({ where: { id } });
+  }
 }

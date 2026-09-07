@@ -23,4 +23,8 @@ export const usersService = {
     );
     return data;
   },
+
+  async deleteMe(): Promise<void> {
+    await api.delete(API_ROUTES.users.deleteMe);
+  },
 };

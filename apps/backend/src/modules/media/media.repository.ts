@@ -17,6 +17,13 @@ export class MediaRepository {
     return this.prisma.media.count({ where: { listingId } });
   }
 
+  listByOwner(ownerId: string): Promise<Array<Pick<Media, 'storageKey' | 'type'>>> {
+    return this.prisma.media.findMany({
+      where: { listing: { ownerId } },
+      select: { storageKey: true, type: true },
+    });
+  }
+
   create(data: Prisma.MediaUncheckedCreateInput): Promise<Media> {
     return this.prisma.media.create({ data });
   }

@@ -85,6 +85,19 @@ export function useSetPassword() {
   return useMutation({ mutationFn: authService.setPassword });
 }
 
+export function useDeleteAccount() {
+  const clear = useAuthStore((s) => s.clear);
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => usersService.deleteMe(),
+    onSuccess: () => {
+      // AuthGate redirects to the sign-in screen once the session clears.
+      clear();
+      qc.clear();
+    },
+  });
+}
+
 export function useUpdateProfile() {
   const setUser = useAuthStore((s) => s.setUser);
   const qc = useQueryClient();

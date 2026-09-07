@@ -94,6 +94,21 @@ export function useSetPassword() {
   });
 }
 
+export function useDeleteAccount() {
+  const clear = useAuthStore((s) => s.clear);
+  const qc = useQueryClient();
+  const router = useRouter();
+  return useMutation({
+    mutationFn: () => usersService.deleteMe(),
+    onSuccess: () => {
+      clear();
+      qc.clear();
+      router.replace('/');
+      router.refresh();
+    },
+  });
+}
+
 export function useUpdateProfile() {
   const setUser = useAuthStore((s) => s.setUser);
   const qc = useQueryClient();

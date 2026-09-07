@@ -19,4 +19,8 @@ export const usersService = {
     const { data } = await api.get<PublicUserProfile>(API_ROUTES.users.publicProfile(userId));
     return data;
   },
+
+  async deleteMe(): Promise<void> {
+    await api.delete(API_ROUTES.users.deleteMe);
+  },
 };
