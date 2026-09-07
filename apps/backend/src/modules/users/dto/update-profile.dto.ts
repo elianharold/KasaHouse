@@ -1,4 +1,4 @@
-import { IsIn, IsOptional, IsString, Length } from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 import {
   ALL_USER_ROLES,
   type UpdateProfilePayload,
@@ -10,6 +10,11 @@ export class UpdateProfileDto implements UpdateProfilePayload {
   @IsString()
   @Length(2, 80, { message: 'Enter your name (2–80 characters).' })
   fullName?: string;
+
+  @IsOptional()
+  @IsEmail({}, { message: 'Enter a valid email address.' })
+  @MaxLength(254)
+  email?: string;
 
   @IsOptional()
   @IsIn(ALL_USER_ROLES)

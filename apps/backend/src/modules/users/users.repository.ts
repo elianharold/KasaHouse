@@ -10,6 +10,10 @@ export class UsersRepository {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
+  findByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
   findPublicById(id: string) {
     return this.prisma.user.findUnique({
       where: { id },

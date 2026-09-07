@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import type { OtpChallenge, RefreshToken, User, UserRole } from '@prisma/client';
+import type {
+  AuthChannel,
+  OtpChallenge,
+  RefreshToken,
+  User,
+  UserRole,
+} from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 @Injectable()
@@ -10,26 +16,45 @@ export class AuthRepository {
     return this.prisma.user.findUnique({ where: { phone } });
   }
 
+  findUserByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
   findUserById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  createUser(phone: string, role: UserRole): Promise<User> {
+  createUser(
+    data: { phone?: string; email?: string },
+    role: UserRole,
+  ): Promise<User> {
     return this.prisma.user.create({
-      data: { phone, roles: [role] },
+      data: { phone: data.phone, email: data.email, roles: [role] },
     });
   }
 
-  /** Most recent challenge for a phone, used for the resend cooldown check. */
-  latestChallengeForPhone(phone: string): Promise<OtpChallenge | null> {
+  setPassword(userId: string, passwordHash: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+  }
+
+  /** Most recent challenge for a destination, for the resend cooldown check. */
+  latestChallengeForDestination(
+    channel: AuthChannel,
+    destination: string,
+  ): Promise<OtpChallenge | null> {
     return this.prisma.otpChallenge.findFirst({
-      where: { phone },
+      where: channel === 'EMAIL' ? { email: destination } : { phone: destination },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   createChallenge(data: {
-    phone: string;
+    channel: AuthChannel;
+    phone?: string;
+    email?: string;
     codeHash: string;
     role: UserRole | null;
     userId: string | null;

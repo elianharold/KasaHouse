@@ -9,6 +9,7 @@ import { LoadingState } from '../../src/components/ui/StateViews';
 import {
   useLogout,
   useSession,
+  useSetPassword,
   useUpdateProfile,
 } from '../../src/hooks/use-auth';
 import { toApiError } from '../../src/lib/api-error';
@@ -25,8 +26,13 @@ function Row({ label, value }: { label: string; value: string }) {
 export default function ProfileScreen() {
   const { user, hydrated, isLandlord, isTenant } = useSession();
   const updateProfile = useUpdateProfile();
+  const setPasswordMut = useSetPassword();
   const logout = useLogout();
+
   const [name, setName] = useState(user?.fullName ?? '');
+  const [email, setEmail] = useState(user?.email ?? '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   if (!hydrated || !user) {
@@ -37,11 +43,32 @@ export default function ProfileScreen() {
     );
   }
 
-  const saveName = async () => {
+  const saveProfile = async () => {
     setError(null);
     try {
-      await updateProfile.mutateAsync({ fullName: name.trim() });
-      Alert.alert('Saved', 'Your name has been updated.');
+      await updateProfile.mutateAsync({
+        fullName: name.trim(),
+        ...(email.trim() && email.trim() !== user.email ? { email: email.trim() } : {}),
+      });
+      Alert.alert('Saved', 'Your profile has been updated.');
+    } catch (err) {
+      setError(toApiError(err).message);
+    }
+  };
+
+  const savePassword = async () => {
+    setError(null);
+    try {
+      await setPasswordMut.mutateAsync({
+        newPassword,
+        ...(user.hasPassword ? { currentPassword } : {}),
+      });
+      setNewPassword('');
+      setCurrentPassword('');
+      Alert.alert(
+        'Password set',
+        'You were signed out on other devices for security.',
+      );
     } catch (err) {
       setError(toApiError(err).message);
     }
@@ -65,26 +92,75 @@ export default function ProfileScreen() {
           placeholder="e.g. Ama Boateng"
           value={name}
           onChangeText={setName}
-          error={error ?? undefined}
         />
+        <TextField
+          label="Email"
+          placeholder="you@example.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+          hint={
+            user.email
+              ? 'Used for email sign-in codes.'
+              : 'Add an email to enable email sign-in and a password.'
+          }
+        />
+        {error ? (
+          <Text className="mb-3 text-sm text-danger">{error}</Text>
+        ) : null}
         <Button
-          label="Save name"
+          label="Save changes"
           variant="secondary"
           loading={updateProfile.isPending}
-          onPress={saveName}
+          onPress={saveProfile}
         />
       </View>
 
+      {user.email ? (
+        <View className="mt-6 rounded-2xl border border-[#E2E8E4] p-4">
+          <Text className="text-sm font-semibold text-ink">
+            {user.hasPassword ? 'Change password' : 'Set a password'}
+          </Text>
+          <Text className="mb-3 mt-1 text-xs text-ink-muted">
+            Optional — sign in with just your email and password.
+          </Text>
+          {user.hasPassword ? (
+            <TextField
+              label="Current password"
+              secureTextEntry
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+            />
+          ) : null}
+          <TextField
+            label="New password"
+            secureTextEntry
+            value={newPassword}
+            onChangeText={setNewPassword}
+            hint="At least 8 characters."
+          />
+          <Button
+            label={user.hasPassword ? 'Update password' : 'Set password'}
+            variant="secondary"
+            loading={setPasswordMut.isPending}
+            disabled={newPassword.length < 8}
+            onPress={savePassword}
+          />
+        </View>
+      ) : null}
+
       <View className="mt-6 rounded-2xl border border-[#E2E8E4] p-4">
-        <Row label="Phone" value={user.phone} />
+        <Row label="Phone" value={user.phone ?? '—'} />
+        <Row label="Email" value={user.email ?? '—'} />
         <Row label="Roles" value={user.roles.join(' + ') || 'None'} />
         <View className="flex-row items-center justify-between py-3">
           <Text className="text-sm text-ink-muted">ID verification</Text>
           <KycBadge status={user.kycStatus} />
         </View>
         <Text className="mt-1 text-xs text-ink-muted">
-          Tenants verify their Ghana Card before a landlord's contact details and
-          chat unlock. ID verification opens in the next KasaHouse update.
+          Tenants verify their Ghana Card before a landlord&apos;s contact details
+          and chat unlock. ID verification opens in the next KasaHouse update.
         </Text>
       </View>
 

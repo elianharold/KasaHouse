@@ -32,12 +32,19 @@ enum KycStatus {
   REJECTED
 }
 
+enum AuthChannel {
+  SMS
+  EMAIL
+}
+
 model User {
-  id        String     @id @default(cuid())
-  phone     String     @unique // E.164, e.g. +233201234567
-  fullName  String?
-  roles     UserRole[] @default([])
-  kycStatus KycStatus  @default(UNVERIFIED)
+  id           String     @id @default(cuid())
+  phone        String?    @unique // E.164, e.g. +233201234567 (null for email-only accounts)
+  email        String?    @unique // null for phone-only accounts
+  passwordHash String? // scrypt hash; null until the user opts to set a password
+  fullName     String?
+  roles        UserRole[] @default([])
+  kycStatus    KycStatus  @default(UNVERIFIED)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -54,21 +61,24 @@ model User {
 model OtpChallenge {
   id String @id @default(cuid())
 
-  phone      String
-  codeHash   String // sha256(code + pepper) — the plain code is never stored
-  role       UserRole? // chosen at request time for brand-new phones
-  expiresAt  DateTime
-  consumedAt DateTime?
-  attempts   Int       @default(0)
-  lockedAt   DateTime?
+  channel     AuthChannel @default(SMS)
+  phone       String? // set when channel = SMS
+  email       String? // set when channel = EMAIL
+  codeHash    String // sha256(code + pepper) — the plain code is never stored
+  role        UserRole? // chosen at request time for brand-new destinations
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  attempts    Int         @default(0)
+  lockedAt    DateTime?
 
-  // Present once the phone resolves to an account (may be null for a new signup).
+  // Present once the destination resolves to an account (null for a new signup).
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 
   @@index([phone, createdAt])
+  @@index([email, createdAt])
   @@map("otp_challenges")
 }
 

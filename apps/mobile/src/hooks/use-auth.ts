@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   UserRole,
+  type AuthSession,
   type RequestOtpResult,
   type VerifyOtpPayload,
 } from '@kasahouse/shared-types';
@@ -48,17 +49,40 @@ export function useRequestOtp() {
   });
 }
 
-export function useVerifyOtp() {
+export function useRequestEmailOtp() {
+  return useMutation<RequestOtpResult, Error, { email: string }>({
+    mutationFn: ({ email }) => authService.requestEmailOtp({ email }),
+  });
+}
+
+function useSessionMutation<TVars>(fn: (v: TVars) => Promise<AuthSession>) {
   const setSession = useAuthStore((s) => s.setSession);
   const qc = useQueryClient();
-
   return useMutation({
-    mutationFn: (payload: VerifyOtpPayload) => authService.verifyOtp(payload),
+    mutationFn: fn,
     onSuccess: (session) => {
       setSession(session.tokens, session.user);
       qc.setQueryData(queryKeys.session, session.user);
     },
   });
+}
+
+export function useVerifyOtp() {
+  return useSessionMutation((p: VerifyOtpPayload) => authService.verifyOtp(p));
+}
+
+export function useVerifyEmailOtp() {
+  return useSessionMutation((p: VerifyOtpPayload) => authService.verifyEmailOtp(p));
+}
+
+export function usePasswordLogin() {
+  return useSessionMutation((p: { email: string; password: string }) =>
+    authService.passwordLogin(p),
+  );
+}
+
+export function useSetPassword() {
+  return useMutation({ mutationFn: authService.setPassword });
 }
 
 export function useUpdateProfile() {

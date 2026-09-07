@@ -3,21 +3,33 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Screen } from '../../src/components/ui/Screen';
 import { Button } from '../../src/components/ui/Button';
-import { useRequestOtp, useVerifyOtp } from '../../src/hooks/use-auth';
+import {
+  useRequestEmailOtp,
+  useRequestOtp,
+  useVerifyEmailOtp,
+  useVerifyOtp,
+} from '../../src/hooks/use-auth';
 import { toApiError } from '../../src/lib/api-error';
 
 export default function VerifyScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
-    phone: string;
+    channel: 'phone' | 'email';
+    destination: string;
     challengeId: string;
-    maskedPhone: string;
+    masked: string;
     resendAfter: string;
     devCode?: string;
   }>();
+  const isEmail = params.channel === 'email';
 
-  const verifyOtp = useVerifyOtp();
-  const requestOtp = useRequestOtp();
+  const verifyPhone = useVerifyOtp();
+  const verifyEmail = useVerifyEmailOtp();
+  const requestPhone = useRequestOtp();
+  const requestEmail = useRequestEmailOtp();
+
+  const verify = isEmail ? verifyEmail : verifyPhone;
+  const request = isEmail ? requestEmail : requestPhone;
 
   const [challengeId, setChallengeId] = useState(params.challengeId);
   const [code, setCode] = useState(params.devCode ?? '');
@@ -34,14 +46,13 @@ export default function VerifyScreen() {
   const submit = async () => {
     setError(null);
     try {
-      await verifyOtp.mutateAsync({ challengeId, code });
-      // AuthGate handles the redirect (to tabs, or to /role for brand-new phones).
+      await verify.mutateAsync({ challengeId, code });
     } catch (err) {
       const apiError = toApiError(err);
       if (apiError.code === 'ROLE_REQUIRED_FOR_SIGNUP') {
         router.push({
           pathname: '/(auth)/role',
-          params: { challengeId, code },
+          params: { challengeId, code, channel: params.channel },
         });
         return;
       }
@@ -52,7 +63,9 @@ export default function VerifyScreen() {
   const resend = async () => {
     setError(null);
     try {
-      const result = await requestOtp.mutateAsync({ phone: params.phone });
+      const result = isEmail
+        ? await requestEmail.mutateAsync({ email: params.destination })
+        : await requestPhone.mutateAsync({ phone: params.destination });
       setChallengeId(result.challengeId);
       setCooldown(result.resendAfterSeconds);
       if (result.devCode) setCode(result.devCode);
@@ -67,7 +80,7 @@ export default function VerifyScreen() {
     <Screen scroll className="flex-1 justify-center">
       <Text className="text-2xl font-bold text-ink">Enter the code</Text>
       <Text className="mt-2 text-base text-ink-muted">
-        We sent a 6-digit code to {params.maskedPhone}.
+        We sent a 6-digit code to {params.masked}.
       </Text>
 
       <Pressable onPress={() => inputRef.current?.focus()} className="mt-8">
@@ -96,7 +109,7 @@ export default function VerifyScreen() {
       <View className="mt-6">
         <Button
           label="Verify & continue"
-          loading={verifyOtp.isPending}
+          loading={verify.isPending}
           disabled={code.length < 4}
           onPress={submit}
         />
@@ -104,13 +117,13 @@ export default function VerifyScreen() {
 
       <Pressable
         onPress={resend}
-        disabled={cooldown > 0 || requestOtp.isPending}
+        disabled={cooldown > 0 || request.isPending}
         className="mt-6"
       >
         <Text className="text-center text-sm text-ink-muted">
           {cooldown > 0
             ? `Resend code in ${cooldown}s`
-            : requestOtp.isPending
+            : request.isPending
               ? 'Sending…'
               : 'Resend code'}
         </Text>
@@ -118,7 +131,7 @@ export default function VerifyScreen() {
 
       <Pressable onPress={() => router.back()} className="mt-3">
         <Text className="text-center text-sm text-brand-dark">
-          Change phone number
+          {isEmail ? 'Change email' : 'Change phone number'}
         </Text>
       </Pressable>
     </Screen>

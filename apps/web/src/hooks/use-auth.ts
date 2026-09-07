@@ -55,15 +55,41 @@ export function useRequestOtp() {
   });
 }
 
-export function useVerifyOtp() {
+export function useRequestEmailOtp() {
+  return useMutation<RequestOtpResult, Error, { email: string }>({
+    mutationFn: ({ email }) => authService.requestEmailOtp({ email }),
+  });
+}
+
+function useSessionMutation<TVars>(fn: (v: TVars) => Promise<import('@kasahouse/shared-types').AuthSession>) {
   const setSession = useAuthStore((s) => s.setSession);
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: VerifyOtpPayload) => authService.verifyOtp(payload),
+    mutationFn: fn,
     onSuccess: (session) => {
       setSession(session.tokens, session.user);
       qc.setQueryData(queryKeys.session, session.user);
     },
+  });
+}
+
+export function useVerifyOtp() {
+  return useSessionMutation((payload: VerifyOtpPayload) => authService.verifyOtp(payload));
+}
+
+export function useVerifyEmailOtp() {
+  return useSessionMutation((payload: VerifyOtpPayload) => authService.verifyEmailOtp(payload));
+}
+
+export function usePasswordLogin() {
+  return useSessionMutation((payload: { email: string; password: string }) =>
+    authService.passwordLogin(payload),
+  );
+}
+
+export function useSetPassword() {
+  return useMutation({
+    mutationFn: authService.setPassword,
   });
 }
 

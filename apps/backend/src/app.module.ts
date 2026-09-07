@@ -7,6 +7,7 @@ import { RolesGuard } from './common/auth/roles.guard';
 import { validateEnv } from './common/config/env.validation';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { EmailModule } from './modules/email/email.module';
 import { HealthController } from './modules/health/health.controller';
 import { ListingsModule } from './modules/listings/listings.module';
 import { MediaModule } from './modules/media/media.module';
@@ -27,6 +28,7 @@ import { UsersModule } from './modules/users/users.module';
     ]),
     PrismaModule,
     SmsModule,
+    EmailModule,
     AuthModule,
     UsersModule,
     ListingsModule,

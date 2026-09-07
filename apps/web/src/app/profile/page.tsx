@@ -8,26 +8,38 @@ import { Button } from '@/components/ui/Button';
 import { Field, Input } from '@/components/ui/Field';
 import { KycBadge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/States';
-import { useLogout, useMe, useSession, useUpdateProfile } from '@/hooks/use-auth';
+import {
+  useLogout,
+  useMe,
+  useSession,
+  useSetPassword,
+  useUpdateProfile,
+} from '@/hooks/use-auth';
 import { toApiError } from '@/lib/api-error';
 
 export default function ProfilePage() {
   const router = useRouter();
   const { hydrated, isAuthenticated, user, isLandlord, isTenant } = useSession();
   const updateProfile = useUpdateProfile();
+  const setPasswordMut = useSetPassword();
   const logout = useLogout();
   useMe();
 
   const [name, setName] = useState('');
-  const [msg, setMsg] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [banner, setBanner] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
 
   useEffect(() => {
     if (hydrated && !isAuthenticated) router.replace('/sign-in?next=/profile');
   }, [hydrated, isAuthenticated, router]);
 
   useEffect(() => {
-    if (user) setName(user.fullName ?? '');
+    if (user) {
+      setName(user.fullName ?? '');
+      setEmail(user.email ?? '');
+    }
   }, [user]);
 
   if (!hydrated || !user) {
@@ -38,14 +50,34 @@ export default function ProfilePage() {
     );
   }
 
-  const saveName = async () => {
-    setMsg(null);
-    setError(null);
+  const saveProfile = async () => {
+    setBanner(null);
     try {
-      await updateProfile.mutateAsync({ fullName: name.trim() });
-      setMsg('Saved.');
+      await updateProfile.mutateAsync({
+        fullName: name.trim(),
+        ...(email.trim() && email.trim() !== user.email ? { email: email.trim() } : {}),
+      });
+      setBanner({ kind: 'ok', text: 'Saved.' });
     } catch (e) {
-      setError(toApiError(e).message);
+      setBanner({ kind: 'err', text: toApiError(e).message });
+    }
+  };
+
+  const savePassword = async () => {
+    setBanner(null);
+    try {
+      await setPasswordMut.mutateAsync({
+        newPassword,
+        ...(user.hasPassword ? { currentPassword } : {}),
+      });
+      setNewPassword('');
+      setCurrentPassword('');
+      setBanner({
+        kind: 'ok',
+        text: 'Password set. You were signed out on other devices for security.',
+      });
+    } catch (e) {
+      setBanner({ kind: 'err', text: toApiError(e).message });
     }
   };
 
@@ -53,19 +85,93 @@ export default function ProfilePage() {
     <Container size="narrow" className="py-10">
       <h1 className="text-2xl font-semibold text-ink">Your account</h1>
 
+      {banner ? (
+        <p
+          className={`mt-4 rounded-xl px-4 py-3 text-sm ${
+            banner.kind === 'ok' ? 'bg-brand-light text-brand-dark' : 'bg-red-50 text-danger'
+          }`}
+        >
+          {banner.text}
+        </p>
+      ) : null}
+
       <div className="mt-6">
-        <Field label="Full name" error={error ?? undefined} hint={msg ?? undefined}>
+        <Field label="Full name">
           {(id) => (
             <Input id={id} value={name} onChange={(e) => setName(e.target.value)} placeholder="Ama Boateng" />
           )}
         </Field>
-        <Button variant="secondary" loading={updateProfile.isPending} onClick={saveName}>
-          Save name
+        <Field
+          label="Email"
+          hint={
+            user.email
+              ? 'Used for email sign-in codes.'
+              : 'Add an email to enable email sign-in and a password.'
+          }
+        >
+          {(id) => (
+            <Input
+              id={id}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
+          )}
+        </Field>
+        <Button variant="secondary" loading={updateProfile.isPending} onClick={saveProfile}>
+          Save changes
         </Button>
       </div>
 
       <div className="mt-8 rounded-2xl border border-line p-4">
-        <Row label="Phone" value={user.phone} />
+        <h2 className="text-sm font-semibold text-ink">
+          {user.hasPassword ? 'Change password' : 'Set a password'}
+        </h2>
+        <p className="mb-3 mt-1 text-xs text-ink-muted">
+          Optional — lets you sign in with just your email and password.
+        </p>
+        {!user.email ? (
+          <p className="text-xs text-ink-muted">Add an email above first.</p>
+        ) : (
+          <>
+            {user.hasPassword ? (
+              <Field label="Current password">
+                {(id) => (
+                  <Input
+                    id={id}
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                )}
+              </Field>
+            ) : null}
+            <Field label="New password" hint="At least 8 characters.">
+              {(id) => (
+                <Input
+                  id={id}
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              )}
+            </Field>
+            <Button
+              variant="secondary"
+              loading={setPasswordMut.isPending}
+              disabled={newPassword.length < 8}
+              onClick={savePassword}
+            >
+              {user.hasPassword ? 'Update password' : 'Set password'}
+            </Button>
+          </>
+        )}
+      </div>
+
+      <div className="mt-8 rounded-2xl border border-line p-4">
+        <Row label="Phone" value={user.phone ?? '—'} />
+        <Row label="Email" value={user.email ?? '—'} />
         <Row label="Roles" value={user.roles.join(' + ') || 'None'} />
         <div className="flex items-center justify-between py-3">
           <span className="text-sm text-ink-muted">ID verification</span>

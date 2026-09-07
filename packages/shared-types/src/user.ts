@@ -23,9 +23,13 @@ export type KycStatus = (typeof KycStatus)[keyof typeof KycStatus];
 
 export interface User {
   id: string;
-  /** E.164, e.g. +233201234567 */
-  phone: string;
+  /** E.164, e.g. +233201234567. Null for accounts created with email only. */
+  phone: string | null;
+  /** Null for accounts created with phone only. */
+  email: string | null;
   fullName: string | null;
+  /** True once the account has set a password (enables the fast email+password login). */
+  hasPassword: boolean;
   /** A single account can hold both roles. */
   roles: UserRole[];
   kycStatus: KycStatus;
@@ -43,6 +47,8 @@ export interface PublicUserProfile {
 
 export interface UpdateProfilePayload {
   fullName?: string;
+  /** Link an email to the account (enables password login + email codes). */
+  email?: string;
   /** Add a role the account does not yet hold. Cannot remove the last role. */
   addRole?: UserRole;
 }

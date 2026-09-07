@@ -7,6 +7,10 @@ export const API_ROUTES = {
   auth: {
     requestOtp: '/auth/otp/request',
     verifyOtp: '/auth/otp/verify',
+    requestEmailOtp: '/auth/email/request',
+    verifyEmailOtp: '/auth/email/verify',
+    passwordLogin: '/auth/password/login',
+    setPassword: '/auth/password/set',
     refresh: '/auth/refresh',
     logout: '/auth/logout',
   },

@@ -30,6 +30,15 @@ export interface AppConfig {
       env: 'sandbox' | 'production';
     };
   };
+  email: {
+    provider: 'console' | 'resend';
+    from: string;
+    resendApiKey: string;
+  };
+  auth: {
+    /** Minimum length for a user-set password. */
+    minPasswordLength: number;
+  };
   cloudinary: {
     cloudName: string;
     apiKey: string;
@@ -90,6 +99,14 @@ export const loadConfiguration = (): AppConfig => ({
       senderId: process.env.AT_SENDER_ID ? process.env.AT_SENDER_ID : null,
       env: (process.env.AT_ENV as 'sandbox' | 'production') || 'sandbox',
     },
+  },
+  email: {
+    provider: (process.env.EMAIL_PROVIDER as AppConfig['email']['provider']) || 'console',
+    from: process.env.EMAIL_FROM ?? 'KasaHouse <onboarding@resend.dev>',
+    resendApiKey: process.env.RESEND_API_KEY ?? '',
+  },
+  auth: {
+    minPasswordLength: int(process.env.AUTH_MIN_PASSWORD_LENGTH, 8),
   },
   cloudinary: {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',

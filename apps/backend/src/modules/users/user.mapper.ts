@@ -9,7 +9,9 @@ import type {
 export const toUser = (row: PrismaUser): User => ({
   id: row.id,
   phone: row.phone,
+  email: row.email,
   fullName: row.fullName,
+  hasPassword: !!row.passwordHash,
   roles: row.roles as UserRole[],
   kycStatus: row.kycStatus as KycStatus,
   createdAt: row.createdAt.toISOString(),

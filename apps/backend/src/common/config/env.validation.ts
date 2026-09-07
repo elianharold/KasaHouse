@@ -29,6 +29,10 @@ export const validateEnv = (): ReturnType<typeof loadConfiguration> => {
     errors.push('AT_API_KEY is required when SMS_PROVIDER=africastalking');
   }
 
+  if (config.email.provider === 'resend' && !config.email.resendApiKey) {
+    errors.push('RESEND_API_KEY is required when EMAIL_PROVIDER=resend');
+  }
+
   if (config.otp.length < 4 || config.otp.length > 8) {
     errors.push('OTP_LENGTH must be between 4 and 8');
   }

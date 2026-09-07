@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { PublicUserProfile, User, UserRole } from '@kasahouse/shared-types';
 import { DomainException } from '../../common/errors/domain.exception';
+import { normalizeEmail } from '../../common/utils/email';
 import { UsersRepository } from './users.repository';
 import { toPublicUserProfile, toUser } from './user.mapper';
 
@@ -16,16 +17,30 @@ export class UsersService {
 
   async updateMe(
     userId: string,
-    patch: { fullName?: string; addRole?: UserRole },
+    patch: { fullName?: string; addRole?: UserRole; email?: string },
   ): Promise<User> {
     const current = await this.repo.findById(userId);
     if (!current) throw new NotFoundException('Account not found');
 
-    const data: { fullName?: string; roles?: UserRole[] } = {};
+    const data: { fullName?: string; roles?: UserRole[]; email?: string } = {};
     if (patch.fullName !== undefined) data.fullName = patch.fullName.trim();
 
     if (patch.addRole && !current.roles.includes(patch.addRole)) {
       data.roles = [...(current.roles as UserRole[]), patch.addRole];
+    }
+
+    if (patch.email !== undefined) {
+      const email = normalizeEmail(patch.email);
+      if (email !== current.email) {
+        const taken = await this.repo.findByEmail(email);
+        if (taken && taken.id !== userId) {
+          throw new DomainException(
+            'EMAIL_TAKEN',
+            'That email is already linked to another account.',
+          );
+        }
+        data.email = email;
+      }
     }
 
     if (Object.keys(data).length === 0) return toUser(current);

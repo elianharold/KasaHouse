@@ -7,8 +7,7 @@ import {
 } from '@kasahouse/shared-types';
 import { serverFetch } from '@/lib/api/server';
 import { Container } from '@/components/layout/Container';
-import { FiltersBar } from '@/components/listings/FiltersBar';
-import { PriceCityFilters } from '@/components/listings/PriceCityFilters';
+import { FilterPanel } from '@/components/listings/FilterPanel';
 import { ListingsView } from '@/components/listings/ListingsView';
 import { ErrorState } from '@/components/ui/States';
 
@@ -57,8 +56,7 @@ export default async function SearchPage({
   return (
     <Container className="py-8">
       <h1 className="mb-4 text-2xl font-semibold text-ink">Search</h1>
-      <FiltersBar showKeyword />
-      <PriceCityFilters />
+      <FilterPanel defaultOpen />
       <div className="mt-6">
         {failed ? (
           <ErrorState error={new Error('Could not load results. The API may be starting up.')} />

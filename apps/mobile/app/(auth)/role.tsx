@@ -4,7 +4,12 @@ import { useLocalSearchParams } from 'expo-router';
 import { UserRole } from '@kasahouse/shared-types';
 import { Screen } from '../../src/components/ui/Screen';
 import { Button } from '../../src/components/ui/Button';
-import { useUpdateProfile, useVerifyOtp, useSession } from '../../src/hooks/use-auth';
+import {
+  useSession,
+  useUpdateProfile,
+  useVerifyEmailOtp,
+  useVerifyOtp,
+} from '../../src/hooks/use-auth';
 import { toApiError } from '../../src/lib/api-error';
 
 const OPTIONS: { role: UserRole; title: string; blurb: string }[] = [
@@ -21,23 +26,30 @@ const OPTIONS: { role: UserRole; title: string; blurb: string }[] = [
 ];
 
 export default function RoleScreen() {
-  const params = useLocalSearchParams<{ challengeId?: string; code?: string }>();
+  const params = useLocalSearchParams<{
+    challengeId?: string;
+    code?: string;
+    channel?: 'phone' | 'email';
+  }>();
   const { isAuthenticated } = useSession();
   const verifyOtp = useVerifyOtp();
+  const verifyEmailOtp = useVerifyEmailOtp();
   const updateProfile = useUpdateProfile();
 
   const [role, setRole] = useState<UserRole | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const pending = verifyOtp.isPending || updateProfile.isPending;
+  const pending =
+    verifyOtp.isPending || verifyEmailOtp.isPending || updateProfile.isPending;
 
   const submit = async () => {
     if (!role) return;
     setError(null);
     try {
       if (!isAuthenticated && params.challengeId && params.code) {
-        // Brand-new phone: finish the sign-up with the chosen role.
-        await verifyOtp.mutateAsync({
+        // Brand-new account: finish the sign-up with the chosen role.
+        const verify = params.channel === 'email' ? verifyEmailOtp : verifyOtp;
+        await verify.mutateAsync({
           challengeId: params.challengeId,
           code: params.code,
           role,
