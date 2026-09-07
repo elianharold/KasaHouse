@@ -192,10 +192,11 @@ Second Vercel project (or the one you already pointed at the backend):
 | Env: `CORS_ORIGINS` | your web app's Vercel URL, comma-separated |
 | Env: `SMS_PROVIDER` | `console` for now |
 
-Vercel has first-class NestJS support: it wraps the **whole app** as one
-Fluid-compute function. `apps/backend/vercel.json` just tells it how to build in
-the monorepo — `prisma generate && nest build` → `dist/`, and Vercel picks up
-`dist/main.js` (which calls `app.listen(process.env.PORT)`) as the entrypoint.
+Vercel has first-class NestJS support: it detects `src/main.ts` (by its
+`@nestjs/core` import + `app.listen()` call) and wraps the **whole app** as one
+Fluid-compute function. `apps/backend/vercel.json` only tells it how to build in
+the monorepo — filtered install, then `prisma generate && nest build` → `dist/`,
+with `outputDirectory: "dist"` so Vercel finds the compiled `dist/main.js`.
 No `api/` directory, no rewrites. `GET /api/v1/health` returns
 `{"status":"ok","db":"up"}` once `DATABASE_URL` points at a live DB.
 
