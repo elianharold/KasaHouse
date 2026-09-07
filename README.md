@@ -10,14 +10,24 @@ This repository is a **pnpm monorepo**:
 | --- | --- | --- |
 | `@kasahouse/mobile` | `apps/mobile` | Expo (SDK 57) · Expo Router · React Native 0.81 · NativeWind · TanStack Query · Zustand · react-hook-form + zod |
 | `@kasahouse/web` | `apps/web` | Next.js 16 (App Router) · Tailwind v4 · TanStack Query · Zustand · react-hook-form + zod — SSR listing pages for SEO, deploys to Vercel |
-| `@kasahouse/backend` | `apps/backend` | NestJS 12 · Prisma 6 · PostgreSQL · Passport JWT · Cloudinary · Africa's Talking |
+| `@kasahouse/backend` | `apps/backend` | NestJS 11 (CommonJS) · Prisma 6 with the **pg driver adapter** (no native engine binary) · PostgreSQL · Passport JWT · Cloudinary · Africa's Talking. Runs as a long-lived server (Railway/Docker via `dist/main.js`) **or** as a Vercel serverless function (`api/index.js`). |
 | `@kasahouse/shared-types` | `packages/shared-types` | Framework-agnostic TypeScript types shared by all three apps (API shapes, enums, route constants) |
 
 ```
   Mobile (Expo)  ─┐
-  Web (Next.js)  ─┼─▶  NestJS API (Railway)  ─▶  Neon Postgres
+  Web (Next.js)  ─┼─▶  NestJS API (Railway or Vercel)  ─▶  Neon Postgres
                   ┘         the web & mobile apps never touch Postgres directly
 ```
+
+> **Why NestJS 11, not 12:** NestJS 12 (and its `@nestjs/config`/`jwt`/`passport`
+> companions) is ESM-only. That breaks `require()`-based runtimes like Vercel's
+> functions and older Node. NestJS 11 is the current CommonJS line.
+>
+> **Why the pg driver adapter:** Prisma's default native query engine is a
+> platform-specific binary that is painful to bundle into a serverless function
+> (especially from a pnpm monorepo). `@prisma/adapter-pg` runs queries through
+> the pure-JS `pg` driver — nothing to bundle, and lazy connections suit
+> serverless. `prisma migrate` still uses the CLI engine at build time.
 
 ---
 
@@ -167,6 +177,29 @@ Local dev and the Railway Docker build pin pnpm explicitly (global install /
 
 The Neon database env vars Vercel auto-injects are **not used** by the web app —
 it only talks to the API.
+
+### API — Vercel (serverless)
+
+Second Vercel project (or the one you already pointed at the backend):
+
+| Setting | Value |
+| --- | --- |
+| **Root Directory** | `apps/backend` |
+| **Framework Preset** | Other |
+| Env: `DATABASE_URL` | Neon **pooled** string (`-pooler` host) — used by the running function |
+| Env: `DIRECT_URL` | Neon **direct** string — used by `prisma migrate deploy` in the build |
+| Env: `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | two different 32+ char secrets |
+| Env: `CORS_ORIGINS` | your web app's Vercel URL, comma-separated |
+| Env: `SMS_PROVIDER` | `console` for now |
+
+`apps/backend/vercel.json` runs `prisma migrate deploy && prisma generate &&
+nest build`, then serves `api/index.js` (which boots Nest once per cold start
+and hands requests to its Express instance) for every route. `GET /api/v1/health`
+should return `{"status":"ok","db":"up"}` once `DATABASE_URL` points at a live DB.
+
+> Phase 2's in-app chat needs WebSockets, which Vercel functions don't support —
+> at that point the realtime piece moves to a managed service (or the whole API
+> moves to Railway using the Docker path below, which is already in the repo).
 
 ### API — Railway or Render (Docker)
 

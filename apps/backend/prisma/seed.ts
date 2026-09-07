@@ -3,9 +3,12 @@
  * browse/search screens have real data on first run.
  * Run with: pnpm --filter @kasahouse/backend db:seed
  */
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, type Prisma } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const connectionString =
+  process.env.DIRECT_URL || process.env.DATABASE_URL || '';
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
 const GHS = (cedis: number): number => Math.round(cedis * 100);
 

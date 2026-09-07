@@ -11,7 +11,8 @@
 FROM node:22-slim AS base
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
 RUN corepack enable && corepack prepare pnpm@12.3.4 --activate
-# OpenSSL is needed by the Prisma query engine.
+# OpenSSL is needed by the Prisma schema engine (`prisma migrate deploy`, run
+# from docker-entrypoint.sh). The runtime uses the pure-JS pg driver adapter.
 RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 WORKDIR /repo

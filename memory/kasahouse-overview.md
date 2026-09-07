@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-KasaHouse — direct landlord/seller-to-tenant/buyer property marketplace for Ghana (eliminates agent fees). pnpm monorepo: `apps/backend` (NestJS 12 + Prisma 6 + Postgres), `apps/mobile` (Expo SDK 57 + Expo Router + NativeWind + TanStack Query + Zustand), `apps/web` (Next.js 15, planned — decided 2026-09-06, full feature parity with mobile, deploys to Vercel), `packages/shared-types`.
+KasaHouse — direct landlord/seller-to-tenant/buyer property marketplace for Ghana (eliminates agent fees). pnpm monorepo: `apps/backend` (NestJS **11** CJS + Prisma 6 with `@prisma/adapter-pg` driver adapter + Postgres), `apps/mobile` (Expo SDK 57 + Expo Router + NativeWind + TanStack Query + Zustand), `apps/web` (Next.js 16 App Router + Tailwind v4, full feature parity with mobile, deploys to Vercel), `packages/shared-types`.
 
 Web app talks to the same NestJS API as mobile — it never touches Postgres directly. "Full feature parity" = parity with whatever backend phase is live (so the web app grows feature-by-feature alongside mobile, not all at once).
 

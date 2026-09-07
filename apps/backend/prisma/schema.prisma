@@ -3,9 +3,9 @@
 
 generator client {
   provider = "prisma-client-js"
-  // "native" covers local dev; the Debian target covers the Docker image used
-  // on Railway / Render (node:22-slim → debian-openssl-3.0.x).
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  // The runtime uses the pure-JS `pg` driver adapter (see PrismaService) — no
+  // native query-engine binary — which is what makes this deployable to Vercel
+  // serverless as well as Railway/Docker without engine-bundling gymnastics.
 }
 
 datasource db {
