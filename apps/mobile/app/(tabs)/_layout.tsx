@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import type { User } from '@kasahouse/shared-types';
 import { colors } from '../../src/theme/tokens';
 import { useSession } from '../../src/hooks/use-auth';
+import { useUnreadCount } from '../../src/hooks/use-chat';
 
 function TabIcon({ glyph, color }: { glyph: string; color: ColorValue }) {
   return <Text style={{ fontSize: 20, color }}>{glyph}</Text>;
@@ -51,6 +52,7 @@ function ProfileTabIcon({ color, focused }: { color: ColorValue; focused: boolea
 
 export default function TabsLayout() {
   const { isLandlord } = useSession();
+  const unread = useUnreadCount();
 
   return (
     <Tabs
@@ -81,6 +83,14 @@ export default function TabsLayout() {
           title: 'My listings',
           href: isLandlord ? '/(tabs)/dashboard' : null,
           tabBarIcon: ({ color }) => <TabIcon glyph="▤" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="messages"
+        options={{
+          title: 'Messages',
+          tabBarBadge: unread > 0 ? unread : undefined,
+          tabBarIcon: ({ color }) => <TabIcon glyph="✉" color={color} />,
         }}
       />
       <Tabs.Screen

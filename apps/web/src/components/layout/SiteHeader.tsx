@@ -7,6 +7,7 @@ import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { useLogout, useSession } from '@/hooks/use-auth';
+import { useUnreadCount } from '@/hooks/use-chat';
 import { Container } from './Container';
 import { Avatar, UserBadge, identityLabel } from './UserBadge';
 
@@ -19,6 +20,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const { isAuthenticated, isLandlord, hydrated, user } = useSession();
   const logout = useLogout();
+  const unread = useUnreadCount();
   const [open, setOpen] = useState(false);
 
   return (
@@ -51,6 +53,17 @@ export function SiteHeader() {
                   My listings
                 </ButtonLink>
               ) : null}
+              <Link
+                href="/messages"
+                className="relative rounded-lg px-3 py-2 text-sm font-medium text-ink-muted hover:bg-surface-sunken"
+              >
+                Messages
+                {unread > 0 ? (
+                  <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-bold text-white">
+                    {unread}
+                  </span>
+                ) : null}
+              </Link>
               <UserBadge user={user} />
               <Button variant="secondary" size="sm" onClick={() => void logout()}>
                 Sign out
@@ -109,6 +122,15 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            {isAuthenticated ? (
+              <Link
+                href="/messages"
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-ink-muted hover:bg-surface-sunken"
+              >
+                Messages {unread > 0 ? `(${unread})` : ''}
+              </Link>
+            ) : null}
             <div className="mt-2 flex flex-col gap-2">
               {isAuthenticated ? (
                 <>

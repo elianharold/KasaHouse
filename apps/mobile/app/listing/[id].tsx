@@ -14,14 +14,30 @@ import {
 import { useListing } from '../../src/hooks/use-listings';
 import { useChangeListingStatus } from '../../src/hooks/use-listing-mutations';
 import { useSession } from '../../src/hooks/use-auth';
+import { useStartThread } from '../../src/hooks/use-chat';
 import { toApiError } from '../../src/lib/api-error';
 
 export default function ListingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { user, isKycVerified } = useSession();
+  const { user, isAuthenticated, isKycVerified } = useSession();
   const { data: listing, isLoading, isError, error, refetch } = useListing(id);
   const changeStatus = useChangeListingStatus(id ?? '');
+  const startThread = useStartThread();
+
+  const openChat = async () => {
+    try {
+      const thread = await startThread.mutateAsync(id as string);
+      router.push(`/messages/${thread.id}`);
+    } catch (e) {
+      const err = toApiError(e);
+      if (err.code === 'KYC_REQUIRED') {
+        router.push(`/verify-id?next=/listing/${id}`);
+        return;
+      }
+      Alert.alert('Could not open chat', err.message);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -177,16 +193,24 @@ export default function ListingDetailScreen() {
                   />
                 )}
               </View>
+            ) : !isAuthenticated ? (
+              <Button
+                label="Sign in to message the owner"
+                onPress={() => router.push('/(auth)/phone')}
+                hint="You'll verify your Ghana Card next. Deals stay on KasaHouse for your protection."
+              />
+            ) : !isKycVerified ? (
+              <Button
+                label="Verify your Ghana Card to message"
+                onPress={() => router.push(`/verify-id?next=/listing/${id}`)}
+                hint="Owners only open chat for verified people. Only the last 4 digits are stored."
+              />
             ) : (
               <Button
-                label="Request to chat"
-                disabled
-                hint={
-                  isKycVerified
-                    ? 'Direct messaging with owners opens in the next KasaHouse update.'
-                    : 'Verify your Ghana Card to unlock the owner’s contact and chat. Staying on-platform protects your payment history and gives you dispute cover.'
-                }
-                onPress={() => undefined}
+                label="Message owner"
+                loading={startThread.isPending}
+                onPress={openChat}
+                hint="Your ID is verified. Keep the conversation on KasaHouse."
               />
             )}
           </View>

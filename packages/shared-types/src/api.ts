@@ -35,6 +35,18 @@ export const API_ROUTES = {
     reorder: (listingId: string) => `/media/listing/${listingId}/reorder`,
     remove: (mediaId: string) => `/media/${mediaId}`,
   },
+  kyc: {
+    status: '/kyc/status',
+    submit: '/kyc/submit',
+    webhook: '/kyc/webhook',
+  },
+  chat: {
+    threads: '/chat/threads',
+    start: '/chat/threads',
+    thread: (id: string) => `/chat/threads/${id}`,
+    messages: (id: string) => `/chat/threads/${id}/messages`,
+    read: (id: string) => `/chat/threads/${id}/read`,
+  },
 } as const;
 
 export const API_VERSION_PREFIX = 'api/v1';

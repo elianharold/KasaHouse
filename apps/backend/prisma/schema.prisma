@@ -49,11 +49,83 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  listings      Listing[]
-  otpChallenges OtpChallenge[]
-  refreshTokens RefreshToken[]
+  listings        Listing[]
+  otpChallenges   OtpChallenge[]
+  refreshTokens   RefreshToken[]
+  kycRecords      KycRecord[]
+  landlordThreads ChatThread[]   @relation("LandlordThreads")
+  tenantThreads   ChatThread[]   @relation("TenantThreads")
+  sentMessages    Message[]      @relation("SentMessages")
 
   @@map("users")
+}
+
+// ─────────────────────────── KYC ───────────────────────────
+
+enum KycProvider {
+  CONSOLE
+  SMILE_ID
+}
+
+model KycRecord {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider        KycProvider
+  status          KycStatus   @default(PENDING)
+  idType          String // e.g. "GHANA_CARD"
+  idNumberLast4   String? // never store the full Ghana Card number
+  providerRef     String?
+  rejectionReason String?
+
+  submittedAt DateTime  @default(now())
+  decidedAt   DateTime?
+
+  @@index([userId, submittedAt])
+  @@map("kyc_records")
+}
+
+// ─────────────────────────── Chat ───────────────────────────
+
+model ChatThread {
+  id String @id @default(cuid())
+
+  listingId  String
+  listing    Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  landlordId String
+  landlord   User    @relation("LandlordThreads", fields: [landlordId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     User    @relation("TenantThreads", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now())
+  lastMessageAt DateTime @default(now())
+
+  messages Message[]
+
+  // one thread per (listing, tenant) pair
+  @@unique([listingId, tenantId])
+  @@index([landlordId, lastMessageAt])
+  @@index([tenantId, lastMessageAt])
+  @@map("chat_threads")
+}
+
+model Message {
+  id String @id @default(cuid())
+
+  threadId String
+  thread   ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderId String
+  sender   User       @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  content    String
+  flagged    Boolean   @default(false)
+  flagReason String?
+  readAt     DateTime?
+  sentAt     DateTime  @default(now())
+
+  @@index([threadId, sentAt])
+  @@map("messages")
 }
 
 // ─────────────────── Auth: OTP + refresh tokens ───────────────────
@@ -161,7 +233,8 @@ model Listing {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  media Media[]
+  media       Media[]
+  chatThreads ChatThread[]
 
   @@index([status, createdAt])
   @@index([purpose, propertyType, status])

@@ -33,6 +33,15 @@ export const validateEnv = (): ReturnType<typeof loadConfiguration> => {
     errors.push('RESEND_API_KEY is required when EMAIL_PROVIDER=resend');
   }
 
+  if (
+    config.kyc.provider === 'smileid' &&
+    (!config.kyc.smileId.partnerId || !config.kyc.smileId.apiKey)
+  ) {
+    errors.push(
+      'SMILE_ID_PARTNER_ID and SMILE_ID_API_KEY are required when KYC_PROVIDER=smileid',
+    );
+  }
+
   if (config.otp.length < 4 || config.otp.length > 8) {
     errors.push('OTP_LENGTH must be between 4 and 8');
   }

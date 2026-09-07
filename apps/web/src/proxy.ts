@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { COOKIE } from '@/lib/session-constants';
 
-const PROTECTED = ['/dashboard', '/profile'];
+const PROTECTED = ['/dashboard', '/profile', '/messages', '/verify-id'];
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -17,5 +17,10 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/profile/:path*'],
+  matcher: [
+    '/dashboard/:path*',
+    '/profile/:path*',
+    '/messages/:path*',
+    '/verify-id/:path*',
+  ],
 };

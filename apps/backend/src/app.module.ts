@@ -7,8 +7,10 @@ import { RolesGuard } from './common/auth/roles.guard';
 import { validateEnv } from './common/config/env.validation';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ChatModule } from './modules/chat/chat.module';
 import { EmailModule } from './modules/email/email.module';
 import { HealthController } from './modules/health/health.controller';
+import { KycModule } from './modules/kyc/kyc.module';
 import { ListingsModule } from './modules/listings/listings.module';
 import { MediaModule } from './modules/media/media.module';
 import { SmsModule } from './modules/sms/sms.module';
@@ -33,6 +35,8 @@ import { UsersModule } from './modules/users/users.module';
     UsersModule,
     ListingsModule,
     MediaModule,
+    KycModule,
+    ChatModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -39,6 +39,15 @@ export interface AppConfig {
     /** Minimum length for a user-set password. */
     minPasswordLength: number;
   };
+  kyc: {
+    provider: 'console' | 'smileid';
+    smileId: {
+      partnerId: string;
+      apiKey: string;
+      env: 'sandbox' | 'production';
+      callbackUrl: string;
+    };
+  };
   cloudinary: {
     cloudName: string;
     apiKey: string;
@@ -107,6 +116,15 @@ export const loadConfiguration = (): AppConfig => ({
   },
   auth: {
     minPasswordLength: int(process.env.AUTH_MIN_PASSWORD_LENGTH, 8),
+  },
+  kyc: {
+    provider: (process.env.KYC_PROVIDER as AppConfig['kyc']['provider']) || 'console',
+    smileId: {
+      partnerId: process.env.SMILE_ID_PARTNER_ID ?? '',
+      apiKey: process.env.SMILE_ID_API_KEY ?? '',
+      env: (process.env.SMILE_ID_ENV as 'sandbox' | 'production') || 'sandbox',
+      callbackUrl: process.env.SMILE_ID_CALLBACK_URL ?? '',
+    },
   },
   cloudinary: {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',

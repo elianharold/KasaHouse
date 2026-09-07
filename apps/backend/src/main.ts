@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import { API_VERSION_PREFIX } from '@kasahouse/shared-types';
 import type { AppConfig } from './common/config/configuration';
@@ -18,8 +19,15 @@ import { AppModule } from './app.module';
  * call to live in this file, so the bootstrap logic is kept inline here.
  */
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: false });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: false,
+    rawBody: true, // needed to verify KYC / payment webhook signatures
+  });
   const config: ConfigService<AppConfig, true> = app.get(ConfigService);
+
+  // KYC submissions carry base64 ID photos.
+  app.useBodyParser('json', { limit: '12mb' });
+  app.useBodyParser('urlencoded', { limit: '12mb', extended: true });
 
   app.use(helmet());
   app.setGlobalPrefix(API_VERSION_PREFIX);

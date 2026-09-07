@@ -62,6 +62,14 @@ function AuthGate() {
         name="listing/[id]/media"
         options={{ headerShown: true, title: 'Photos & video', presentation: 'modal' }}
       />
+      <Stack.Screen
+        name="verify-id"
+        options={{ headerShown: true, title: 'Verify your ID', presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="messages/[id]"
+        options={{ headerShown: true, title: 'Conversation' }}
+      />
     </Stack>
   );
 }
