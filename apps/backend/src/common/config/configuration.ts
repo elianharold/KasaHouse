@@ -87,7 +87,7 @@ export const loadConfiguration = (): AppConfig => ({
   otp: {
     length: int(process.env.OTP_LENGTH, 6),
     ttlSeconds: int(process.env.OTP_TTL_SECONDS, 300),
-    resendCooldownSeconds: int(process.env.OTP_RESEND_COOLDOWN_SECONDS, 45),
+    resendCooldownSeconds: int(process.env.OTP_RESEND_COOLDOWN_SECONDS, 30),
     maxVerifyAttempts: int(process.env.OTP_MAX_VERIFY_ATTEMPTS, 5),
     pepper: process.env.JWT_ACCESS_SECRET ?? 'kasahouse-otp-pepper',
   },

@@ -4,6 +4,7 @@ import { API_ROUTES, type Listing } from '@kasahouse/shared-types';
 import { serverFetch } from '@/lib/api/server';
 import { ApiError } from '@/lib/api-error';
 import { Container } from '@/components/layout/Container';
+import { BackButton } from '@/components/ui/BackButton';
 import { Gallery } from '@/components/listings/Gallery';
 import { ContactPanel } from '@/components/listings/ContactPanel';
 import {
@@ -64,6 +65,7 @@ export default async function ListingDetailPage({
 
   return (
     <Container className="py-8">
+      <BackButton fallbackHref="/browse" label="Back to listings" className="mb-4" />
       <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
         <div>
           <Gallery media={listing.media} title={listing.title} />

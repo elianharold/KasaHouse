@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ListingForm } from '@/features/listing-form/ListingForm';
 import { toUpsertPayload } from '@/features/listing-form/schema';
 import { useCreateListing } from '@/hooks/use-listing-mutations';
+import { BackButton } from '@/components/ui/BackButton';
 import { toApiError } from '@/lib/api-error';
 
 export default function NewListingPage() {
@@ -14,6 +15,7 @@ export default function NewListingPage() {
 
   return (
     <div>
+      <BackButton fallbackHref="/dashboard" label="My listings" className="mb-3" />
       <h1 className="mb-1 text-2xl font-semibold text-ink">New listing</h1>
       <p className="mb-6 text-sm text-ink-muted">
         Save the details, then add photos and a video before publishing.

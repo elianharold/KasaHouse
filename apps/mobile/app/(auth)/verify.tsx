@@ -34,7 +34,7 @@ export default function VerifyScreen() {
   const [challengeId, setChallengeId] = useState(params.challengeId);
   const [code, setCode] = useState(params.devCode ?? '');
   const [error, setError] = useState<string | null>(null);
-  const [cooldown, setCooldown] = useState(Number(params.resendAfter) || 45);
+  const [cooldown, setCooldown] = useState(Number(params.resendAfter) || 30);
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {

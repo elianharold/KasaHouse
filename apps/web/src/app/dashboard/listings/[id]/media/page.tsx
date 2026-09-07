@@ -7,6 +7,7 @@ import { Trash2, RotateCw, ImagePlus } from 'lucide-react';
 import { MediaType } from '@kasahouse/shared-types';
 import { Button } from '@/components/ui/Button';
 import { Spinner, ErrorState } from '@/components/ui/States';
+import { BackButton } from '@/components/ui/BackButton';
 import { useListing } from '@/hooks/use-listings';
 import { useChangeListingStatus } from '@/hooks/use-listing-mutations';
 import { useListingMediaUpload } from '@/hooks/use-media';
@@ -52,6 +53,7 @@ export default function ListingMediaPage({
 
   return (
     <div>
+      <BackButton fallbackHref={`/listings/${id}`} className="mb-3" />
       <h1 className="mb-1 text-2xl font-semibold text-ink">Photos &amp; video</h1>
       <p className="mb-6 text-sm text-ink-muted">
         Add clear photos and a short video. Images are compressed in your browser before upload to

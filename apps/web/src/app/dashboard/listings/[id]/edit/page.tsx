@@ -7,6 +7,7 @@ import { fromListing, toUpsertPayload } from '@/features/listing-form/schema';
 import { useListing } from '@/hooks/use-listings';
 import { useUpdateListing } from '@/hooks/use-listing-mutations';
 import { Spinner, ErrorState } from '@/components/ui/States';
+import { BackButton } from '@/components/ui/BackButton';
 import { toApiError } from '@/lib/api-error';
 
 export default function EditListingPage({
@@ -25,6 +26,7 @@ export default function EditListingPage({
 
   return (
     <div>
+      <BackButton fallbackHref={`/listings/${id}`} className="mb-3" />
       <h1 className="mb-6 text-2xl font-semibold text-ink">Edit listing</h1>
       {saveError ? (
         <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-danger">{saveError}</p>

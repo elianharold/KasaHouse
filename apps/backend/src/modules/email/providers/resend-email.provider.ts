@@ -38,9 +38,15 @@ export class ResendEmailProvider implements EmailProvider {
 
       if (error) {
         this.logger.error(`Resend rejected the email: ${error.name} — ${error.message}`);
+        // The shared testing sender (onboarding@resend.dev) only delivers to the
+        // Resend account owner. Surface that clearly instead of a generic error.
+        const testingRestriction =
+          /testing emails to your own email|verify a domain/i.test(error.message);
         throw new DomainException(
           'EMAIL_SEND_FAILED',
-          'We could not send the email right now. Please try again shortly.',
+          testingRestriction
+            ? 'Email is in Resend test mode and can only reach the account owner. Verify a domain in Resend, or set EMAIL_PROVIDER=console for testing.'
+            : `Email could not be sent: ${error.message}`,
         );
       }
 

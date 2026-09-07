@@ -82,11 +82,34 @@ export default function ProfileScreen() {
     }
   };
 
+  const initials = (() => {
+    const n = user.fullName?.trim();
+    if (n) {
+      const p = n.split(/\s+/).filter(Boolean);
+      return (p[0]![0]! + (p[1]?.[0] ?? '')).toUpperCase();
+    }
+    if (user.email) return user.email[0]!.toUpperCase();
+    if (user.phone) return user.phone.slice(-2);
+    return '·';
+  })();
+
   return (
     <Screen scroll>
-      <Text className="text-xl font-bold text-ink">Your account</Text>
+      <View className="mb-5 flex-row items-center gap-3">
+        <View className="h-12 w-12 items-center justify-center rounded-full bg-brand">
+          <Text className="text-base font-bold text-white">{initials}</Text>
+        </View>
+        <View className="flex-1">
+          <Text className="text-lg font-bold text-ink" numberOfLines={1}>
+            {user.fullName?.trim() || user.email || user.phone || 'Your account'}
+          </Text>
+          <Text className="text-xs text-ink-muted">
+            {user.roles.join(' + ') || 'No role yet'}
+          </Text>
+        </View>
+      </View>
 
-      <View className="mt-4">
+      <View className="mt-2">
         <TextField
           label="Full name"
           placeholder="e.g. Ama Boateng"
