@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
-import type { ListingSummary } from '@kasahouse/shared-types';
+import { ListingPurpose, type ListingSummary } from '@kasahouse/shared-types';
 import { bedroomLabel, formatPrice, propertyTypeLabel } from '../../lib/format';
 import { colors } from '../../theme/tokens';
 import { ListingStatusBadge } from '../ui/Badge';
@@ -35,7 +35,17 @@ export function ListingCard({
             </View>
           )}
 
-          <View className="absolute left-3 top-3 flex-row">
+          <View
+            className={`absolute left-3 top-3 rounded-md px-2 py-0.5 ${
+              listing.purpose === ListingPurpose.RENT ? 'bg-brand' : 'bg-accent'
+            }`}
+          >
+            <Text className="text-xs font-bold uppercase tracking-wide text-white">
+              {listing.purpose === ListingPurpose.RENT ? 'For rent' : 'For sale'}
+            </Text>
+          </View>
+
+          <View className="absolute bottom-3 left-3 flex-row">
             {listing.hasVideo ? (
               <View className="mr-2 rounded-md bg-black/60 px-2 py-0.5">
                 <Text className="text-xs font-semibold text-white">▶ Video</Text>

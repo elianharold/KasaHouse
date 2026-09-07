@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, PlayCircle, X, Expand } from 'lucide-react';
 import { MediaType, type Media } from '@kasahouse/shared-types';
+import { cloudinaryBlurUrl } from '@/lib/cloudinary-loader';
 import { cn } from '@/lib/utils';
 
 export function Gallery({ media, title }: { media: Media[]; title: string }) {
@@ -53,6 +54,9 @@ export function Gallery({ media, title }: { media: Media[]; title: string }) {
               sizes="(max-width: 1024px) 100vw, 66vw"
               className="object-cover"
               priority
+              {...(cloudinaryBlurUrl(current.url)
+                ? { placeholder: 'blur' as const, blurDataURL: cloudinaryBlurUrl(current.url) }
+                : {})}
             />
             <span className="pointer-events-none absolute right-3 top-3 rounded-lg bg-black/50 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100">
               <Expand className="size-4" />

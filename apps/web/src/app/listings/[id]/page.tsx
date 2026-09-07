@@ -5,6 +5,7 @@ import { serverFetch } from '@/lib/api/server';
 import { ApiError } from '@/lib/api-error';
 import { Container } from '@/components/layout/Container';
 import { BackButton } from '@/components/ui/BackButton';
+import { PurposeBadge } from '@/components/ui/Badge';
 import { Gallery } from '@/components/listings/Gallery';
 import { ContactPanel } from '@/components/listings/ContactPanel';
 import {
@@ -71,9 +72,12 @@ export default async function ListingDetailPage({
           <Gallery media={listing.media} title={listing.title} />
 
           <div className="mt-6">
-            <p className="text-2xl font-bold text-brand">
-              {formatPrice(listing.price, listing.purpose, listing.rentPeriod)}
-            </p>
+            <div className="flex items-center gap-3">
+              <PurposeBadge purpose={listing.purpose} />
+              <p className="text-2xl font-bold text-brand">
+                {formatPrice(listing.price, listing.purpose, listing.rentPeriod)}
+              </p>
+            </div>
             <h1 className="mt-1 text-xl font-semibold text-ink">{listing.title}</h1>
             <p className="mt-1 text-sm text-ink-muted">
               {listing.location.area}, {listing.location.city}

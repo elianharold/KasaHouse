@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   UserRole,
@@ -108,10 +109,16 @@ export function useUpdateProfile() {
 export function useLogout() {
   const clear = useAuthStore((s) => s.clear);
   const qc = useQueryClient();
-  return useCallback(async () => {
-    const rt = getRefreshToken();
-    if (rt) await authService.logout(rt).catch(() => undefined);
-    clear();
-    qc.clear();
-  }, [clear, qc]);
+  const router = useRouter();
+  return useCallback(
+    async (redirectTo = '/') => {
+      const rt = getRefreshToken();
+      if (rt) await authService.logout(rt).catch(() => undefined);
+      clear();
+      qc.clear();
+      router.replace(redirectTo);
+      router.refresh();
+    },
+    [clear, qc, router],
+  );
 }

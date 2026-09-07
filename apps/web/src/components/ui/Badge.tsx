@@ -1,4 +1,8 @@
-import { ListingStatus, type KycStatus } from '@kasahouse/shared-types';
+import {
+  ListingPurpose,
+  ListingStatus,
+  type KycStatus,
+} from '@kasahouse/shared-types';
 import { cn } from '@/lib/utils';
 
 type Tone = 'neutral' | 'success' | 'warning' | 'danger' | 'brand';
@@ -42,6 +46,28 @@ export function ListingStatusBadge({ status }: { status: ListingStatus }) {
   };
   const [label, tone] = map[status];
   return <Badge tone={tone}>{label}</Badge>;
+}
+
+/** "For rent" / "For sale" — high-contrast, meant to sit on top of a photo. */
+export function PurposeBadge({
+  purpose,
+  className,
+}: {
+  purpose: ListingPurpose;
+  className?: string;
+}) {
+  const isRent = purpose === ListingPurpose.RENT;
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white shadow-sm',
+        isRent ? 'bg-brand' : 'bg-accent',
+        className,
+      )}
+    >
+      {isRent ? 'For rent' : 'For sale'}
+    </span>
+  );
 }
 
 export function KycBadge({ status }: { status: KycStatus }) {

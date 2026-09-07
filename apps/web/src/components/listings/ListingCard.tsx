@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { PlayCircle } from 'lucide-react';
 import type { ListingSummary } from '@kasahouse/shared-types';
 import { bedroomLabel, formatPrice, propertyTypeLabel } from '@/lib/format';
-import { ListingStatusBadge } from '@/components/ui/Badge';
+import { cloudinaryBlurUrl } from '@/lib/cloudinary-loader';
+import { ListingStatusBadge, PurposeBadge } from '@/components/ui/Badge';
 
 export function ListingCard({
   listing,
@@ -15,7 +16,9 @@ export function ListingCard({
   priority?: boolean;
 }) {
   const beds = bedroomLabel(listing.bedrooms);
-  const cover = listing.coverImageUrl ?? listing.coverThumbnailUrl;
+  // Cards are small — start from the already-tiny thumbnail (the loader resizes
+  // it further per breakpoint), only fall back to the full image if needed.
+  const cover = listing.coverThumbnailUrl ?? listing.coverImageUrl;
 
   return (
     <Link
@@ -31,6 +34,9 @@ export function ListingCard({
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover"
             priority={priority}
+            {...(cloudinaryBlurUrl(cover)
+              ? { placeholder: 'blur' as const, blurDataURL: cloudinaryBlurUrl(cover) }
+              : {})}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-ink-faint">
@@ -38,7 +44,11 @@ export function ListingCard({
           </div>
         )}
 
-        <div className="absolute left-3 top-3 flex gap-2">
+        <div className="absolute left-3 top-3">
+          <PurposeBadge purpose={listing.purpose} />
+        </div>
+
+        <div className="absolute bottom-3 left-3 flex gap-2">
           {listing.hasVideo ? (
             <span className="inline-flex items-center gap-1 rounded-md bg-black/60 px-2 py-0.5 text-xs font-semibold text-white">
               <PlayCircle className="size-3.5" /> Video

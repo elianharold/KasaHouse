@@ -39,3 +39,27 @@ body {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
+
+/*
+ * Tailwind v4 removed the preflight rule that gave buttons a pointer cursor.
+ * Restore the hand cursor on everything interactive.
+ */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  label[for],
+  select:not(:disabled),
+  summary,
+  [type="submit"]:not(:disabled),
+  [type="button"]:not(:disabled),
+  [type="reset"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"],
+  select:disabled {
+    cursor: not-allowed;
+  }
+}
