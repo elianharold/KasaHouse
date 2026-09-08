@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { UserRole } from '@kasahouse/shared-types';
 import { Screen } from '../../src/components/ui/Screen';
 import { Button } from '../../src/components/ui/Button';
@@ -25,6 +26,7 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { user, hydrated, isLandlord, isTenant } = useSession();
   const updateProfile = useUpdateProfile();
   const setPasswordMut = useSetPassword();
@@ -185,8 +187,23 @@ export default function ProfileScreen() {
         </View>
         <Text className="mt-1 text-xs text-ink-muted">
           Tenants verify their Ghana Card before a landlord&apos;s contact details
-          and chat unlock. ID verification opens in the next KasaHouse update.
+          and chat unlock. Only the last 4 digits of your card are stored.
         </Text>
+        {user.kycStatus === 'VERIFIED' ? null : (
+          <View className="mt-3">
+            <Button
+              label={
+                user.kycStatus === 'PENDING'
+                  ? 'Check verification status'
+                  : user.kycStatus === 'REJECTED'
+                    ? 'Verification failed — try again'
+                    : 'Verify your Ghana Card'
+              }
+              variant={user.kycStatus === 'REJECTED' ? 'danger' : 'primary'}
+              onPress={() => router.push('/verify-id')}
+            />
+          </View>
+        )}
       </View>
 
       {(!isLandlord || !isTenant) && (

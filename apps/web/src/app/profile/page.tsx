@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserRole } from '@kasahouse/shared-types';
 import { Container } from '@/components/layout/Container';
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 import { Field, Input } from '@/components/ui/Field';
 import { KycBadge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/States';
@@ -183,8 +183,23 @@ export default function ProfilePage() {
         </div>
         <p className="text-xs text-ink-muted">
           Tenants and buyers verify their Ghana Card before a landlord&apos;s contact details and
-          chat unlock. ID verification opens in the next KasaHouse update.
+          chat unlock. Only the last 4 digits of your card are stored.
         </p>
+
+        {user.kycStatus === 'VERIFIED' ? null : (
+          <ButtonLink
+            href="/verify-id?next=/profile"
+            variant={user.kycStatus === 'REJECTED' ? 'danger' : 'primary'}
+            size="sm"
+            className="mt-3"
+          >
+            {user.kycStatus === 'PENDING'
+              ? 'Check verification status'
+              : user.kycStatus === 'REJECTED'
+                ? 'Verification failed — try again'
+                : 'Verify your Ghana Card'}
+          </ButtonLink>
+        )}
       </div>
 
       {(!isLandlord || !isTenant) && (
