@@ -17,7 +17,7 @@ import type {
 import { toPublicUserProfile } from '../users/user.mapper';
 
 type ListingRow = PrismaListing & {
-  owner: Pick<PrismaUser, 'id' | 'fullName' | 'roles' | 'createdAt'>;
+  owner: Pick<PrismaUser, 'id' | 'fullName' | 'roles' | 'createdAt' | 'kycStatus'>;
   media: PrismaMedia[];
 };
 
@@ -103,6 +103,7 @@ export const toListingSummary = (row: ListingRow): ListingSummary => {
     mediaCount: ordered.length,
     hasVideo: ordered.some((m) => m.type === 'VIDEO'),
     status: row.status as ListingStatus,
+    ownerVerified: row.owner.kycStatus === 'VERIFIED',
     createdAt: row.createdAt.toISOString(),
   };
 };

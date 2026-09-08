@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { CheckCheck, CornerDownLeft, Eye, Lock, ShieldAlert } from 'lucide-react';
 import type { ChatMessage, ChatThreadDetail } from '@kasahouse/shared-types';
 import { BackButton } from '@/components/ui/BackButton';
+import { VerifiedTick } from '@/components/ui/Badge';
 import { Container } from '@/components/layout/Container';
 import { cn } from '@/lib/utils';
 import { dayLabel, messageTime, sameDay } from '@/lib/format';
@@ -72,7 +73,10 @@ export function ChatConversation({ thread }: { thread: ChatThreadDetail }) {
           {initialsFromName(thread.counterparty.fullName)}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-ink">{counterpartyName}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="truncate text-sm font-semibold text-ink">{counterpartyName}</p>
+            <VerifiedTick verified={thread.counterparty.verified} size="xs" />
+          </div>
           <Link
             href={`/listings/${thread.listingId}`}
             className="truncate text-xs text-brand-dark hover:underline"

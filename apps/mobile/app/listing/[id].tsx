@@ -3,7 +3,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ListingStatus } from '@kasahouse/shared-types';
 import { Gallery } from '../../src/components/listing/Gallery';
 import { Button } from '../../src/components/ui/Button';
-import { ListingStatusBadge } from '../../src/components/ui/Badge';
+import { ListingStatusBadge, VerifiedTick } from '../../src/components/ui/Badge';
 import { ErrorState, LoadingState } from '../../src/components/ui/StateViews';
 import {
   bedroomLabel,
@@ -147,9 +147,12 @@ export default function ListingDetailScreen() {
 
           <View className="mt-6 rounded-2xl border border-[#E2E8E4] p-4">
             <Text className="text-sm text-ink-muted">Listed by</Text>
-            <Text className="mt-0.5 text-base font-semibold text-ink">
-              {listing.owner.fullName ?? 'KasaHouse member'}
-            </Text>
+            <View className="mt-0.5 flex-row flex-wrap items-center gap-2">
+              <Text className="text-base font-semibold text-ink">
+                {listing.owner.fullName ?? 'KasaHouse member'}
+              </Text>
+              <VerifiedTick verified={listing.owner.verified} showUnverified />
+            </View>
             <Text className="mt-0.5 text-xs text-ink-faint">
               Member since{' '}
               {new Date(listing.owner.memberSince).toLocaleDateString('en-GH', {

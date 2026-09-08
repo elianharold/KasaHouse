@@ -19,10 +19,11 @@ export const toUser = (row: PrismaUser): User => ({
 });
 
 export const toPublicUserProfile = (
-  row: Pick<PrismaUser, 'id' | 'fullName' | 'roles' | 'createdAt'>,
+  row: Pick<PrismaUser, 'id' | 'fullName' | 'roles' | 'createdAt' | 'kycStatus'>,
 ): PublicUserProfile => ({
   id: row.id,
   fullName: row.fullName,
   roles: row.roles as UserRole[],
   memberSince: row.createdAt.toISOString(),
+  verified: row.kycStatus === 'VERIFIED',
 });

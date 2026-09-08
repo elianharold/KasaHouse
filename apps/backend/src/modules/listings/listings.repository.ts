@@ -3,7 +3,9 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 const withOwnerAndMedia = {
-  owner: { select: { id: true, fullName: true, roles: true, createdAt: true } },
+  owner: {
+    select: { id: true, fullName: true, roles: true, createdAt: true, kycStatus: true },
+  },
   media: { orderBy: { order: 'asc' } },
 } satisfies Prisma.ListingInclude;
 

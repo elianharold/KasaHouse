@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Lock, MessageCircle, ShieldCheck } from 'lucide-react';
 import { ListingStatus, type Listing } from '@kasahouse/shared-types';
 import { Button, ButtonLink } from '@/components/ui/Button';
-import { ListingStatusBadge } from '@/components/ui/Badge';
+import { ListingStatusBadge, VerifiedTick } from '@/components/ui/Badge';
 import { useChangeListingStatus } from '@/hooks/use-listing-mutations';
 import { useSession } from '@/hooks/use-auth';
 import { useStartThread } from '@/hooks/use-chat';
@@ -60,7 +60,12 @@ export function ContactPanel({ listing }: { listing: Listing }) {
 
       <div className="mt-4 border-t border-line pt-4">
         <p className="text-xs text-ink-muted">Listed by</p>
-        <p className="font-semibold text-ink">{listing.owner.fullName ?? 'KasaHouse member'}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="font-semibold text-ink">
+            {listing.owner.fullName ?? 'KasaHouse member'}
+          </p>
+          <VerifiedTick verified={listing.owner.verified} showUnverified />
+        </div>
         <p className="text-xs text-ink-faint">Member since {memberSince}</p>
       </div>
 

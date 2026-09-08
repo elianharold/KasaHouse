@@ -32,6 +32,33 @@ export function ListingStatusBadge({ status }: { status: ListingStatus }) {
   return <Badge label={label} tone={tone} />;
 }
 
+/** Trust marker for another person — shows only when they are verified,
+ *  unless showUnverified is set. */
+export function VerifiedTick({
+  verified,
+  showUnverified = false,
+}: {
+  verified: boolean;
+  showUnverified?: boolean;
+}) {
+  if (!verified && !showUnverified) return null;
+  return (
+    <View
+      className={`flex-row items-center self-start rounded-full px-2 py-0.5 ${
+        verified ? 'bg-brand-light' : 'bg-surface-sunken'
+      }`}
+    >
+      <Text
+        className={`text-[11px] font-semibold ${
+          verified ? 'text-brand-dark' : 'text-ink-muted'
+        }`}
+      >
+        {verified ? '✓ Verified' : 'ID not verified'}
+      </Text>
+    </View>
+  );
+}
+
 export function KycBadge({ status }: { status: KycStatus }) {
   const map: Record<KycStatus, { label: string; tone: Tone }> = {
     UNVERIFIED: { label: 'ID not verified', tone: 'neutral' },

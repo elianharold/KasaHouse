@@ -98,6 +98,8 @@ export interface ListingSummary {
   mediaCount: number;
   hasVideo: boolean;
   status: ListingStatus;
+  /** True when the listing owner has passed Ghana Card verification. */
+  ownerVerified: boolean;
   createdAt: ISODateString;
 }
 

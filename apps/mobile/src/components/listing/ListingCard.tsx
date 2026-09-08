@@ -4,7 +4,7 @@ import { Link } from 'expo-router';
 import { ListingPurpose, type ListingSummary } from '@kasahouse/shared-types';
 import { bedroomLabel, formatPrice, propertyTypeLabel } from '../../lib/format';
 import { colors } from '../../theme/tokens';
-import { ListingStatusBadge } from '../ui/Badge';
+import { ListingStatusBadge, VerifiedTick } from '../ui/Badge';
 
 const BLUR_HASH = 'L6PZfSi_.AyE_3t7t7R**0o#DgR4';
 
@@ -74,6 +74,12 @@ export function ListingCard({
           <Text className="mt-0.5 text-sm text-ink-muted" numberOfLines={1}>
             {listing.location.area}, {listing.location.city}
           </Text>
+
+          {listing.ownerVerified ? (
+            <View className="mt-1.5">
+              <VerifiedTick verified />
+            </View>
+          ) : null}
 
           <View className="mt-2 flex-row items-center justify-between">
             <Text className="text-base font-bold" style={{ color: colors.brand }}>

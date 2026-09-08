@@ -4,7 +4,7 @@ import { PlayCircle } from 'lucide-react';
 import type { ListingSummary } from '@kasahouse/shared-types';
 import { bedroomLabel, formatPrice, propertyTypeLabel } from '@/lib/format';
 import { cloudinaryBlurUrl } from '@/lib/cloudinary-loader';
-import { ListingStatusBadge, PurposeBadge } from '@/components/ui/Badge';
+import { ListingStatusBadge, PurposeBadge, VerifiedTick } from '@/components/ui/Badge';
 
 export function ListingCard({
   listing,
@@ -73,6 +73,9 @@ export function ListingCard({
         <p className="mt-0.5 line-clamp-1 text-sm text-ink-muted">
           {listing.location.area}, {listing.location.city}
         </p>
+        {listing.ownerVerified ? (
+          <VerifiedTick verified size="xs" className="mt-1.5 self-start" />
+        ) : null}
         <div className="mt-auto flex items-center justify-between pt-3">
           <span className="text-base font-bold text-brand">
             {formatPrice(listing.price, listing.purpose, listing.rentPeriod)}

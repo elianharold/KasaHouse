@@ -8,6 +8,7 @@ import {
   LoadingState,
 } from '../../src/components/ui/StateViews';
 import { relativeTime } from '../../src/lib/format';
+import { VerifiedTick } from '../../src/components/ui/Badge';
 import { useThreads } from '../../src/hooks/use-chat';
 
 export default function MessagesScreen() {
@@ -59,9 +60,15 @@ export default function MessagesScreen() {
               ) : null}
             </View>
             <View className="flex-1">
-              <Text className="text-sm font-semibold text-ink" numberOfLines={1}>
-                {item.counterparty.fullName ?? 'KasaHouse member'}
-              </Text>
+              <View className="flex-row items-center gap-1.5">
+                <Text
+                  className="flex-shrink text-sm font-semibold text-ink"
+                  numberOfLines={1}
+                >
+                  {item.counterparty.fullName ?? 'KasaHouse member'}
+                </Text>
+                <VerifiedTick verified={item.counterparty.verified} />
+              </View>
               <Text className="text-xs text-ink-muted" numberOfLines={1}>
                 {item.listingTitle}
               </Text>

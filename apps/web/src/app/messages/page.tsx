@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Container } from '@/components/layout/Container';
 import { Spinner, EmptyState, ErrorState } from '@/components/ui/States';
-import { PurposeBadge } from '@/components/ui/Badge';
+import { PurposeBadge, VerifiedTick } from '@/components/ui/Badge';
 import { ButtonLink } from '@/components/ui/Button';
 import { relativeTime } from '@/lib/format';
 import { useSession } from '@/hooks/use-auth';
@@ -66,6 +66,9 @@ export default function MessagesPage() {
                     <p className="truncate text-sm font-semibold text-ink">
                       {t.counterparty.fullName ?? 'KasaHouse member'}
                     </p>
+                    {t.counterparty.verified ? (
+                      <VerifiedTick verified size="xs" />
+                    ) : null}
                     <PurposeBadge purpose={t.listingPurpose} className="scale-90" />
                   </div>
                   <p className="truncate text-xs text-ink-muted">{t.listingTitle}</p>

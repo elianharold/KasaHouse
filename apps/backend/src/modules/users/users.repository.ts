@@ -17,7 +17,7 @@ export class UsersRepository {
   findPublicById(id: string) {
     return this.prisma.user.findUnique({
       where: { id },
-      select: { id: true, fullName: true, roles: true, createdAt: true },
+      select: { id: true, fullName: true, roles: true, createdAt: true, kycStatus: true },
     });
   }
 

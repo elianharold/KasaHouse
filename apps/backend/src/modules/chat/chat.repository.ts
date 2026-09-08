@@ -11,8 +11,12 @@ const threadInclude = {
       media: { orderBy: { order: 'asc' }, take: 1, select: { thumbnailUrl: true } },
     },
   },
-  landlord: { select: { id: true, fullName: true, roles: true, createdAt: true } },
-  tenant: { select: { id: true, fullName: true, roles: true, createdAt: true } },
+  landlord: {
+    select: { id: true, fullName: true, roles: true, createdAt: true, kycStatus: true },
+  },
+  tenant: {
+    select: { id: true, fullName: true, roles: true, createdAt: true, kycStatus: true },
+  },
 } satisfies Prisma.ChatThreadInclude;
 
 export type ThreadWithRelations = Prisma.ChatThreadGetPayload<{

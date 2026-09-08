@@ -43,6 +43,8 @@ export interface PublicUserProfile {
   fullName: string | null;
   roles: UserRole[];
   memberSince: ISODateString;
+  /** True when this person has passed Ghana Card verification. */
+  verified: boolean;
 }
 
 export interface UpdateProfilePayload {

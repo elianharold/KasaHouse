@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import type { ChatMessage } from '@kasahouse/shared-types';
 import { ErrorState, LoadingState } from '../../src/components/ui/StateViews';
+import { VerifiedTick } from '../../src/components/ui/Badge';
 import { colors } from '../../src/theme/tokens';
 import { dayLabel, messageTime, sameDay } from '../../src/lib/format';
 import { useSendMessage, useThread } from '../../src/hooks/use-chat';
@@ -86,9 +87,12 @@ export default function ThreadScreen() {
               className="flex-1"
               onPress={() => router.push(`/listing/${detail.listingId}`)}
             >
-              <Text className="text-sm font-semibold text-ink" numberOfLines={1}>
-                {counterpartyName}
-              </Text>
+              <View className="flex-row items-center gap-1.5">
+                <Text className="text-sm font-semibold text-ink" numberOfLines={1}>
+                  {counterpartyName}
+                </Text>
+                <VerifiedTick verified={detail.counterparty.verified} />
+              </View>
               <Text className="text-xs text-ink-muted" numberOfLines={1}>
                 {detail.listingTitle} · view listing
               </Text>
