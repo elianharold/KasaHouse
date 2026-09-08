@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { useLogout, useSession } from '@/hooks/use-auth';
 import { useUnreadCount } from '@/hooks/use-chat';
+import { useHideOnScroll } from '@/hooks/use-hide-on-scroll';
 import { Container } from './Container';
 import { Avatar, UserBadge, identityLabel } from './UserBadge';
 
@@ -22,6 +23,7 @@ export function SiteHeader() {
   const logout = useLogout();
   const unread = useUnreadCount();
   const [open, setOpen] = useState(false);
+  const hidden = useHideOnScroll(80, open);
 
   // Mirror the unread count into the browser tab title, so a message that
   // arrives while KasaHouse sits in a background tab still gets noticed.
@@ -34,7 +36,13 @@ export function SiteHeader() {
   }, [unread]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
+    <header
+      className={cn(
+        'sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur',
+        'transition-transform duration-300 ease-out motion-reduce:transition-none',
+        hidden ? '-translate-y-full' : 'translate-y-0',
+      )}
+    >
       <Container className="flex h-16 items-center justify-between">
         <Link href="/" className="text-lg font-bold tracking-tight text-brand">
           KasaHouse
