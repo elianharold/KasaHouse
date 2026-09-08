@@ -7,15 +7,27 @@ import type {
 import { toPublicUserProfile } from '../users/user.mapper';
 import type { ThreadWithRelations } from './chat.repository';
 
-export const toChatMessage = (row: PrismaMessage, viewerId: string): ChatMessage => ({
-  id: row.id,
-  threadId: row.threadId,
-  senderId: row.senderId,
-  content: row.content,
-  sentAt: row.sentAt.toISOString(),
-  readAt: row.readAt ? row.readAt.toISOString() : null,
-  mine: row.senderId === viewerId,
-});
+export const toChatMessage = (
+  row: PrismaMessage,
+  viewerId: string,
+  thread: Pick<
+    ThreadWithRelations,
+    'landlordId' | 'landlord' | 'tenant'
+  >,
+): ChatMessage => {
+  const sender =
+    row.senderId === thread.landlordId ? thread.landlord : thread.tenant;
+  return {
+    id: row.id,
+    threadId: row.threadId,
+    senderId: row.senderId,
+    senderName: sender.fullName,
+    content: row.content,
+    sentAt: row.sentAt.toISOString(),
+    readAt: row.readAt ? row.readAt.toISOString() : null,
+    mine: row.senderId === viewerId,
+  };
+};
 
 export const toThreadSummary = (
   thread: ThreadWithRelations,

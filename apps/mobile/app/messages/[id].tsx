@@ -24,6 +24,36 @@ function initials(name: string | null): string {
   return (p[0]![0]! + (p[1]?.[0] ?? '')).toUpperCase();
 }
 
+function Bubble({ item }: { item: ChatMessage }) {
+  return (
+    <View
+      className={`max-w-[80%] rounded-2xl px-3 py-1.5 ${
+        item.mine
+          ? 'rounded-br-sm bg-brand'
+          : 'rounded-bl-sm border border-[#E2E8E4] bg-surface'
+      }`}
+    >
+      <Text className={`text-sm ${item.mine ? 'text-white' : 'text-ink'}`}>
+        {item.content}
+      </Text>
+      <View className="mt-0.5 flex-row items-center justify-end gap-1">
+        <Text
+          className={`text-[10px] ${item.mine ? 'text-white/70' : 'text-ink-faint'}`}
+        >
+          {messageTime(item.sentAt)}
+        </Text>
+        {item.mine ? (
+          <Text
+            className={`text-[10px] ${item.readAt ? 'text-sky-200' : 'text-white/70'}`}
+          >
+            {item.readAt ? '✓✓' : '✓'}
+          </Text>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
 export default function ThreadScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -51,7 +81,7 @@ export default function ThreadScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-surface" edges={['bottom']}>
+    <SafeAreaView className="flex-1 bg-[#ece5dd]" edges={['bottom']}>
       <Stack.Screen options={{ headerShown: false }} />
 
       {thread.isLoading ? (
@@ -63,8 +93,8 @@ export default function ThreadScreen() {
           className="flex-1"
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          {/* header — avatar + name top-left, listing under it */}
-          <View className="flex-row items-center gap-3 border-b border-[#E2E8E4] px-4 py-3">
+          {/* header — the other person, top-left */}
+          <View className="flex-row items-center gap-3 border-b border-[#E2E8E4] bg-surface px-3 py-2.5">
             <Pressable onPress={() => router.back()} className="pr-1">
               <Text className="text-2xl text-brand-dark">‹</Text>
             </Pressable>
@@ -90,7 +120,7 @@ export default function ThreadScreen() {
             ref={listRef}
             data={detail.messages}
             keyExtractor={(m) => m.id}
-            contentContainerStyle={{ padding: 12 }}
+            contentContainerStyle={{ padding: 10 }}
             onContentSizeChange={() =>
               listRef.current?.scrollToEnd({ animated: false })
             }
@@ -102,44 +132,22 @@ export default function ThreadScreen() {
             renderItem={({ item, index }) => {
               const prev = detail.messages[index - 1];
               const showDay = !prev || !sameDay(prev.sentAt, item.sentAt);
-              const newSpeaker = !prev || prev.mine !== item.mine || showDay;
+              const grouped = !!prev && prev.mine === item.mine && !showDay;
               return (
                 <View>
                   {showDay ? (
                     <View className="my-3 items-center">
-                      <Text className="rounded-full bg-surface-sunken px-3 py-0.5 text-[11px] font-medium text-ink-muted">
+                      <Text className="overflow-hidden rounded-md bg-white/70 px-2.5 py-0.5 text-[11px] font-medium text-ink-muted">
                         {dayLabel(item.sentAt)}
                       </Text>
                     </View>
                   ) : null}
-
-                  <View className={item.mine ? 'items-end' : 'items-start'}>
-                    {newSpeaker ? (
-                      <Text className="mb-0.5 px-1 text-[11px] font-medium text-ink-faint">
-                        {item.mine ? 'You' : counterpartyName}
-                      </Text>
-                    ) : null}
-                    <View
-                      className={`max-w-[80%] rounded-2xl px-3 py-2 ${
-                        item.mine
-                          ? 'rounded-br-sm bg-brand'
-                          : 'rounded-bl-sm border border-[#E2E8E4] bg-surface'
-                      }`}
-                    >
-                      <Text
-                        className={`text-sm ${item.mine ? 'text-white' : 'text-ink'}`}
-                      >
-                        {item.content}
-                      </Text>
-                    </View>
-                    <Text className="mt-0.5 px-1 text-[10px] text-ink-faint">
-                      {messageTime(item.sentAt)}
-                      {item.mine
-                        ? item.readAt
-                          ? '  ✓✓ Read'
-                          : '  ✓ Sent'
-                        : ''}
-                    </Text>
+                  <View
+                    className={`${item.mine ? 'items-end' : 'items-start'} ${
+                      grouped ? 'mt-0.5' : 'mt-2'
+                    }`}
+                  >
+                    <Bubble item={item} />
                   </View>
                 </View>
               );
@@ -152,14 +160,14 @@ export default function ThreadScreen() {
             </Text>
           ) : null}
 
-          <View className="flex-row items-center gap-2 border-t border-[#E2E8E4] p-2">
+          <View className="flex-row items-center gap-2 border-t border-[#E2E8E4] bg-surface p-2">
             <TextInput
               value={text}
               onChangeText={setText}
               placeholder="Write a message…"
               placeholderTextColor={colors.inkFaint}
               maxLength={2000}
-              className="flex-1 rounded-xl border border-[#E2E8E4] bg-surface px-3.5 py-2.5 text-sm text-ink"
+              className="flex-1 rounded-full border border-[#E2E8E4] bg-surface px-4 py-2.5 text-sm text-ink"
             />
             <Button
               label="Send"
@@ -169,7 +177,7 @@ export default function ThreadScreen() {
               onPress={submit}
             />
           </View>
-          <Text className="pb-1 text-center text-[10px] text-ink-faint">
+          <Text className="bg-surface pb-1 text-center text-[10px] text-ink-faint">
             Messages can&apos;t be edited or deleted. Keep it on KasaHouse.
           </Text>
         </KeyboardAvoidingView>

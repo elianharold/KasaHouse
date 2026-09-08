@@ -107,7 +107,7 @@ export class ChatService {
     }
 
     const message = await this.repo.createMessage(threadId, userId, trimmed);
-    return toChatMessage(message, userId);
+    return toChatMessage(message, userId, thread);
   }
 
   async markRead(userId: string, threadId: string): Promise<{ updated: number }> {
@@ -140,7 +140,7 @@ export class ChatService {
 
     return {
       ...toThreadSummary(thread, userId, unread, ordered.at(-1)?.content ?? null),
-      messages: ordered.map((m) => toChatMessage(m, userId)),
+      messages: ordered.map((m) => toChatMessage(m, userId, thread)),
       hasMoreMessages: hasMore,
     };
   }

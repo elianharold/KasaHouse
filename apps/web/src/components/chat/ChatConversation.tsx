@@ -46,8 +46,8 @@ export function ChatConversation({ thread }: { thread: ChatThreadDetail }) {
     <Container size="narrow" className="flex h-[calc(100dvh-4rem)] flex-col py-4">
       <BackButton fallbackHref="/messages" label="Messages" className="mb-2" />
 
-      {/* header — name top-left, listing under it */}
-      <div className="mb-3 flex items-center gap-3 rounded-xl border border-line bg-surface p-3">
+      {/* header — the other person's name, top-left */}
+      <div className="mb-2 flex items-center gap-3 rounded-xl border border-line bg-surface p-3">
         <span className="grid size-10 shrink-0 place-items-center rounded-full bg-brand text-sm font-bold text-white">
           {initialsFromName(thread.counterparty.fullName)}
         </span>
@@ -64,7 +64,7 @@ export function ChatConversation({ thread }: { thread: ChatThreadDetail }) {
 
       <div
         ref={scrollRef}
-        className="flex-1 space-y-1 overflow-y-auto rounded-xl bg-surface-sunken p-3"
+        className="flex-1 overflow-y-auto rounded-xl bg-[#ece5dd] p-3"
       >
         {thread.messages.length === 0 ? (
           <p className="py-8 text-center text-sm text-ink-muted">
@@ -74,34 +74,24 @@ export function ChatConversation({ thread }: { thread: ChatThreadDetail }) {
           thread.messages.map((m, i) => {
             const prev = thread.messages[i - 1];
             const showDay = !prev || !sameDay(prev.sentAt, m.sentAt);
-            const newSpeaker = !prev || prev.mine !== m.mine || showDay;
+            const grouped = !!prev && prev.mine === m.mine && !showDay;
             return (
               <div key={m.id}>
                 {showDay ? (
                   <div className="my-3 flex justify-center">
-                    <span className="rounded-full bg-surface px-3 py-0.5 text-[11px] font-medium text-ink-muted">
+                    <span className="rounded-md bg-white/70 px-2.5 py-0.5 text-[11px] font-medium text-ink-muted shadow-sm">
                       {dayLabel(m.sentAt)}
                     </span>
                   </div>
                 ) : null}
-
-                <div className={cn('flex flex-col', m.mine ? 'items-end' : 'items-start')}>
-                  {newSpeaker ? (
-                    <span className="mb-0.5 px-1 text-[11px] font-medium text-ink-faint">
-                      {m.mine ? 'You' : counterpartyName}
-                    </span>
-                  ) : null}
-                  <div
-                    className={cn(
-                      'max-w-[80%] rounded-2xl px-3 py-2 text-sm',
-                      m.mine
-                        ? 'rounded-br-sm bg-brand text-white'
-                        : 'rounded-bl-sm border border-line bg-surface text-ink',
-                    )}
-                  >
-                    {m.content}
-                  </div>
-                  <MessageMeta message={m} />
+                <div
+                  className={cn(
+                    'flex',
+                    m.mine ? 'justify-end' : 'justify-start',
+                    grouped ? 'mt-0.5' : 'mt-2',
+                  )}
+                >
+                  <Bubble message={m} />
                 </div>
               </div>
             );
@@ -128,7 +118,7 @@ export function ChatConversation({ thread }: { thread: ChatThreadDetail }) {
           onChange={(e) => setText(e.target.value)}
           placeholder="Write a message…"
           maxLength={2000}
-          className="flex-1 rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
+          className="flex-1 rounded-full border border-line bg-surface px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30"
         />
         <Button type="submit" loading={send.isPending} disabled={!text.trim()}>
           Send
@@ -142,21 +132,41 @@ export function ChatConversation({ thread }: { thread: ChatThreadDetail }) {
   );
 }
 
-function MessageMeta({ message }: { message: ChatMessage }) {
+function Bubble({ message: m }: { message: ChatMessage }) {
+  const meta = `${messageTime(m.sentAt)}`;
   return (
-    <span className="mt-0.5 flex items-center gap-1 px-1 text-[10px] text-ink-faint">
-      {messageTime(message.sentAt)}
-      {message.mine ? (
-        message.readAt ? (
-          <span className="flex items-center gap-0.5 text-brand">
-            <CheckCheck className="size-3" /> Read
-          </span>
-        ) : (
-          <span className="flex items-center gap-0.5">
-            <Check className="size-3" /> Sent
-          </span>
-        )
-      ) : null}
-    </span>
+    <div
+      className={cn(
+        'relative max-w-[78%] rounded-lg px-2.5 pb-1.5 pt-1.5 text-sm shadow-sm',
+        m.mine
+          ? 'rounded-br-none bg-brand text-white'
+          : 'rounded-bl-none bg-white text-ink',
+      )}
+    >
+      <span className="whitespace-pre-wrap break-words">{m.content}</span>
+      {/* phantom spacer so the last line reserves room for the timestamp */}
+      <span
+        aria-hidden
+        className="pointer-events-none invisible ml-2 select-none text-[10px]"
+      >
+        {meta}
+        {m.mine ? ' ✓✓' : ''}
+      </span>
+      <span
+        className={cn(
+          'absolute bottom-1 right-2 flex items-center gap-0.5 text-[10px]',
+          m.mine ? 'text-white/75' : 'text-ink-faint',
+        )}
+      >
+        {meta}
+        {m.mine ? (
+          m.readAt ? (
+            <CheckCheck className="size-3.5 text-sky-200" />
+          ) : (
+            <Check className="size-3.5" />
+          )
+        ) : null}
+      </span>
+    </div>
   );
 }

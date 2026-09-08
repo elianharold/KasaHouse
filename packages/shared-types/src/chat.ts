@@ -6,10 +6,12 @@ export interface ChatMessage {
   id: string;
   threadId: string;
   senderId: string;
+  /** Display name of whoever sent it — resolved server-side, authoritative. */
+  senderName: string | null;
   content: string;
   sentAt: ISODateString;
   readAt: ISODateString | null;
-  /** True if this is your own message. */
+  /** True if the viewer sent this message. */
   mine: boolean;
 }
 
