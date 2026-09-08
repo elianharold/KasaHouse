@@ -1,15 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ChatThreadDetail } from '@kasahouse/shared-types';
 import { chatService } from '../services/chat-service';
+import { useAuthStore } from '../store/auth-store';
 import { useSession } from './use-auth';
 
-const threadsKey = ['chat', 'threads'] as const;
-const threadKey = (id: string) => ['chat', 'thread', id] as const;
+const uid = (): string => useAuthStore.getState().user?.id ?? 'anon';
+const threadsKey = () => ['chat', uid(), 'threads'] as const;
+const threadKey = (id: string) => ['chat', uid(), 'thread', id] as const;
 
 export function useThreads() {
-  const { isAuthenticated } = useSession();
+  const { isAuthenticated, user } = useSession();
   return useQuery({
-    queryKey: threadsKey,
+    queryKey: ['chat', user?.id ?? 'anon', 'threads'],
     queryFn: () => chatService.listThreads(),
     enabled: isAuthenticated,
     refetchInterval: 15_000,
@@ -23,15 +25,16 @@ export function useUnreadCount() {
 
 export function useThread(id: string | undefined) {
   const qc = useQueryClient();
+  const { user } = useSession();
   return useQuery({
-    queryKey: threadKey(id ?? 'none'),
-    enabled: !!id,
+    queryKey: ['chat', user?.id ?? 'anon', 'thread', id ?? 'none'],
+    enabled: !!id && !!user,
     refetchInterval: 5_000,
     queryFn: async () => {
       const detail = await chatService.getThread(id as string);
       if (detail.unreadCount > 0) {
         void chatService.markRead(id as string).then(() => {
-          qc.invalidateQueries({ queryKey: threadsKey });
+          qc.invalidateQueries({ queryKey: threadsKey() });
         });
       }
       return detail;
@@ -45,7 +48,7 @@ export function useStartThread() {
     mutationFn: (listingId: string) => chatService.startThread(listingId),
     onSuccess: (detail: ChatThreadDetail) => {
       qc.setQueryData(threadKey(detail.id), detail);
-      qc.invalidateQueries({ queryKey: threadsKey });
+      qc.invalidateQueries({ queryKey: threadsKey() });
     },
   });
 }
@@ -58,7 +61,7 @@ export function useSendMessage(threadId: string) {
       qc.setQueryData<ChatThreadDetail>(threadKey(threadId), (prev) =>
         prev ? { ...prev, messages: [...prev.messages, message] } : prev,
       );
-      qc.invalidateQueries({ queryKey: threadsKey });
+      qc.invalidateQueries({ queryKey: threadsKey() });
     },
   });
 }

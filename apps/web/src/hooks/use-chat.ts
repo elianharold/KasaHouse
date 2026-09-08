@@ -3,18 +3,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ChatThreadDetail } from '@kasahouse/shared-types';
 import { chatService } from '@/services/chat-service';
+import { useAuthStore } from '@/store/auth-store';
 import { useSession } from './use-auth';
 
-const threadsKey = ['chat', 'threads'] as const;
-const threadKey = (id: string) => ['chat', 'thread', id] as const;
+/**
+ * Every chat query key is namespaced by the signed-in user id, so two accounts
+ * open in the same browser never read each other's cached conversations.
+ */
+const uid = (): string => useAuthStore.getState().user?.id ?? 'anon';
+const threadsKey = () => ['chat', uid(), 'threads'] as const;
+const threadKey = (id: string) => ['chat', uid(), 'thread', id] as const;
 
 export function useThreads() {
-  const { isAuthenticated } = useSession();
+  const { isAuthenticated, user } = useSession();
   return useQuery({
-    queryKey: threadsKey,
+    queryKey: ['chat', user?.id ?? 'anon', 'threads'],
     queryFn: () => chatService.listThreads(),
     enabled: isAuthenticated,
-    // light polling so the list + unread counts stay fresh
     refetchInterval: 15_000,
   });
 }
@@ -26,17 +31,16 @@ export function useUnreadCount() {
 
 export function useThread(id: string | undefined) {
   const qc = useQueryClient();
+  const { user } = useSession();
   return useQuery({
-    queryKey: threadKey(id ?? 'none'),
-    enabled: !!id,
-    // poll the open conversation for new messages
+    queryKey: ['chat', user?.id ?? 'anon', 'thread', id ?? 'none'],
+    enabled: !!id && !!user,
     refetchInterval: 5_000,
     queryFn: async () => {
       const detail = await chatService.getThread(id as string);
-      // mark the counterparty's messages read whenever we view the thread
       if (detail.unreadCount > 0) {
         void chatService.markRead(id as string).then(() => {
-          qc.invalidateQueries({ queryKey: threadsKey });
+          qc.invalidateQueries({ queryKey: threadsKey() });
         });
       }
       return detail;
@@ -50,7 +54,7 @@ export function useStartThread() {
     mutationFn: (listingId: string) => chatService.startThread(listingId),
     onSuccess: (detail: ChatThreadDetail) => {
       qc.setQueryData(threadKey(detail.id), detail);
-      qc.invalidateQueries({ queryKey: threadsKey });
+      qc.invalidateQueries({ queryKey: threadsKey() });
     },
   });
 }
@@ -62,10 +66,10 @@ export function useSendMessage(threadId: string) {
     onSuccess: (message) => {
       qc.setQueryData<ChatThreadDetail>(threadKey(threadId), (prev) =>
         prev
-          ? { ...prev, messages: [...prev.messages, message], lastMessage: message.content }
+          ? { ...prev, messages: [...prev.messages, message] }
           : prev,
       );
-      qc.invalidateQueries({ queryKey: threadsKey });
+      qc.invalidateQueries({ queryKey: threadsKey() });
     },
   });
 }
