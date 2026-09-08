@@ -25,6 +25,48 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
+function RoleToggle({
+  label,
+  hint,
+  active,
+  disabled,
+  onPress,
+}: {
+  label: string;
+  hint: string;
+  active: boolean;
+  disabled?: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      className={`flex-row items-center justify-between gap-3 rounded-xl border p-3 ${
+        active ? 'border-brand/30 bg-brand-light/50' : 'border-[#E2E8E4]'
+      } ${disabled ? 'opacity-60' : ''}`}
+    >
+      <View className="flex-1">
+        <Text className="text-sm font-medium text-ink">{label}</Text>
+        <Text className="text-xs text-ink-muted">{hint}</Text>
+      </View>
+      <View
+        className={`rounded-full px-2 py-0.5 ${
+          active ? 'bg-brand' : 'bg-surface-sunken'
+        }`}
+      >
+        <Text
+          className={`text-xs font-semibold ${
+            active ? 'text-white' : 'text-ink-muted'
+          }`}
+        >
+          {active ? 'On' : 'Off'}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, hydrated, isLandlord, isTenant } = useSession();
@@ -78,9 +120,11 @@ export default function ProfileScreen() {
     }
   };
 
-  const addRole = async (role: UserRole) => {
+  const toggleRole = async (role: UserRole, active: boolean) => {
     try {
-      await updateProfile.mutateAsync({ addRole: role });
+      await updateProfile.mutateAsync(
+        active ? { removeRole: role } : { addRole: role },
+      );
     } catch (err) {
       Alert.alert('Could not update', toApiError(err).message);
     }
@@ -206,31 +250,30 @@ export default function ProfileScreen() {
         )}
       </View>
 
-      {(!isLandlord || !isTenant) && (
-        <View className="mt-6">
-          <Text className="mb-2 text-sm font-medium text-ink">Add a role</Text>
-          {!isLandlord && (
-            <Pressable
-              onPress={() => addRole(UserRole.LANDLORD)}
-              className="mb-2 rounded-xl border border-[#E2E8E4] p-3"
-            >
-              <Text className="text-sm text-ink">
-                Become a landlord / seller — list a property
-              </Text>
-            </Pressable>
-          )}
-          {!isTenant && (
-            <Pressable
-              onPress={() => addRole(UserRole.TENANT)}
-              className="rounded-xl border border-[#E2E8E4] p-3"
-            >
-              <Text className="text-sm text-ink">
-                Also look for a place as a tenant / buyer
-              </Text>
-            </Pressable>
-          )}
-        </View>
-      )}
+      <View className="mt-6 rounded-2xl border border-[#E2E8E4] p-4">
+        <Text className="text-sm font-semibold text-ink">Your roles</Text>
+        <Text className="mb-3 mt-1 text-xs text-ink-muted">
+          Switch these on or off any time. Landlords list properties; tenants
+          browse and message owners. You can hold both.
+        </Text>
+        <RoleToggle
+          label="Landlord / seller"
+          hint="List and manage properties."
+          active={isLandlord}
+          disabled={updateProfile.isPending || (isLandlord && !isTenant)}
+          onPress={() =>
+            toggleRole(UserRole.LANDLORD, isLandlord)
+          }
+        />
+        <View className="h-2" />
+        <RoleToggle
+          label="Tenant / buyer"
+          hint="Browse, save and message owners."
+          active={isTenant}
+          disabled={updateProfile.isPending || (isTenant && !isLandlord)}
+          onPress={() => toggleRole(UserRole.TENANT, isTenant)}
+        />
+      </View>
 
       <View className="mt-10">
         <Button

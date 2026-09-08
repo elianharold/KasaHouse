@@ -49,6 +49,8 @@ export interface UpdateProfilePayload {
   fullName?: string;
   /** Link an email to the account (enables password login + email codes). */
   email?: string;
-  /** Add a role the account does not yet hold. Cannot remove the last role. */
+  /** Add a role the account does not yet hold. */
   addRole?: UserRole;
+  /** Drop a role from the account. The account must keep at least one role. */
+  removeRole?: UserRole;
 }

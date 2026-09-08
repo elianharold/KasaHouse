@@ -202,25 +202,43 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {(!isLandlord || !isTenant) && (
-        <div className="mt-6">
-          <h2 className="mb-2 text-sm font-medium text-ink">Add a role</h2>
-          <div className="space-y-2">
-            {!isLandlord && (
-              <RoleButton
-                label="Become a landlord / seller"
-                onClick={() => updateProfile.mutate({ addRole: UserRole.LANDLORD })}
-              />
-            )}
-            {!isTenant && (
-              <RoleButton
-                label="Also look for a place as a tenant / buyer"
-                onClick={() => updateProfile.mutate({ addRole: UserRole.TENANT })}
-              />
-            )}
-          </div>
+      <div className="mt-8 rounded-2xl border border-line p-4">
+        <h2 className="text-sm font-semibold text-ink">Your roles</h2>
+        <p className="mb-3 mt-1 text-xs text-ink-muted">
+          Switch these on or off any time. Landlords list properties; tenants
+          browse and message owners. You can hold both.
+        </p>
+        <div className="space-y-2">
+          <RoleToggle
+            label="Landlord / seller"
+            hint="List and manage properties."
+            active={isLandlord}
+            disabled={updateProfile.isPending || (isLandlord && !isTenant)}
+            onToggle={() =>
+              updateProfile.mutate(
+                isLandlord
+                  ? { removeRole: UserRole.LANDLORD }
+                  : { addRole: UserRole.LANDLORD },
+                { onError: (e) => setBanner({ kind: 'err', text: toApiError(e).message }) },
+              )
+            }
+          />
+          <RoleToggle
+            label="Tenant / buyer"
+            hint="Browse, save and message owners."
+            active={isTenant}
+            disabled={updateProfile.isPending || (isTenant && !isLandlord)}
+            onToggle={() =>
+              updateProfile.mutate(
+                isTenant
+                  ? { removeRole: UserRole.TENANT }
+                  : { addRole: UserRole.TENANT },
+                { onError: (e) => setBanner({ kind: 'err', text: toApiError(e).message }) },
+              )
+            }
+          />
         </div>
-      )}
+      </div>
 
       <div className="mt-10">
         <Button variant="ghost" onClick={() => void logout()}>
@@ -299,13 +317,40 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function RoleButton({ label, onClick }: { label: string; onClick: () => void }) {
+function RoleToggle({
+  label,
+  hint,
+  active,
+  disabled,
+  onToggle,
+}: {
+  label: string;
+  hint: string;
+  active: boolean;
+  disabled?: boolean;
+  onToggle: () => void;
+}) {
   return (
     <button
-      onClick={onClick}
-      className="w-full rounded-xl border border-line p-3 text-left text-sm text-ink hover:bg-surface-sunken"
+      type="button"
+      onClick={onToggle}
+      disabled={disabled}
+      aria-pressed={active}
+      className={`flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+        active ? 'border-brand/30 bg-brand-light/50' : 'border-line hover:bg-surface-sunken'
+      }`}
     >
-      {label}
+      <span className="min-w-0">
+        <span className="block text-sm font-medium text-ink">{label}</span>
+        <span className="block text-xs text-ink-muted">{hint}</span>
+      </span>
+      <span
+        className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
+          active ? 'bg-brand text-white' : 'bg-surface-sunken text-ink-muted'
+        }`}
+      >
+        {active ? 'On' : 'Off'}
+      </span>
     </button>
   );
 }

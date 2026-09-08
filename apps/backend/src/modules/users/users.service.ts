@@ -43,7 +43,12 @@ export class UsersService {
 
   async updateMe(
     userId: string,
-    patch: { fullName?: string; addRole?: UserRole; email?: string },
+    patch: {
+      fullName?: string;
+      addRole?: UserRole;
+      removeRole?: UserRole;
+      email?: string;
+    },
   ): Promise<User> {
     const current = await this.repo.findById(userId);
     if (!current) throw new NotFoundException('Account not found');
@@ -51,8 +56,25 @@ export class UsersService {
     const data: { fullName?: string; roles?: UserRole[]; email?: string } = {};
     if (patch.fullName !== undefined) data.fullName = patch.fullName.trim();
 
-    if (patch.addRole && !current.roles.includes(patch.addRole)) {
-      data.roles = [...(current.roles as UserRole[]), patch.addRole];
+    let roles = current.roles as UserRole[];
+    if (patch.addRole && !roles.includes(patch.addRole)) {
+      roles = [...roles, patch.addRole];
+    }
+    if (patch.removeRole && roles.includes(patch.removeRole)) {
+      const next = roles.filter((r) => r !== patch.removeRole);
+      if (next.length === 0) {
+        throw new DomainException(
+          'LAST_ROLE',
+          'Keep at least one role — add the other role before removing this one.',
+        );
+      }
+      roles = next;
+    }
+    if (
+      roles.length !== current.roles.length ||
+      roles.some((r) => !current.roles.includes(r))
+    ) {
+      data.roles = roles;
     }
 
     if (patch.email !== undefined) {
