@@ -4,6 +4,7 @@ import { env } from '@/lib/env';
 import { Providers } from './providers';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { SiteFooter } from '@/components/layout/SiteFooter';
+import { ScrollToTop } from '@/components/layout/ScrollToTop';
 
 export const metadata: Metadata = {
   metadataBase: env.siteUrlObject,
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteHeader />
           <main className="flex-1">{children}</main>
           <SiteFooter />
+          <ScrollToTop />
         </Providers>
       </body>
     </html>
