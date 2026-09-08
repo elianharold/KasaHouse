@@ -20,7 +20,10 @@ export function useThreads() {
     queryKey: ['chat', user?.id ?? 'anon', 'threads'],
     queryFn: () => chatService.listThreads(),
     enabled: isAuthenticated,
+    // keep polling while the KasaHouse tab is in the background, so the unread
+    // tag lights up even when a message arrives while the user is elsewhere.
     refetchInterval: 15_000,
+    refetchIntervalInBackground: true,
   });
 }
 
