@@ -8,15 +8,17 @@ import axios, {
 import { API_ROUTES, type AuthTokens } from '@kasahouse/shared-types';
 import { env } from '@/lib/env';
 import { toApiError } from '@/lib/api-error';
-import {
-  clearSession,
-  getAccessToken,
-  getRefreshToken,
-  persistTokens,
-} from '@/lib/session';
+import { clearSession, getRefreshToken, persistTokens } from '@/lib/session';
 import { useAuthStore } from '@/store/auth-store';
 
 type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
+
+// The in-memory store is this tab's session (per-tab); fall back to storage
+// before the store has hydrated.
+const currentAccessToken = (): string | null =>
+  useAuthStore.getState().tokens?.accessToken ?? null;
+const currentRefreshToken = (): string | null =>
+  useAuthStore.getState().tokens?.refreshToken ?? getRefreshToken();
 
 /** Browser-side API client. Server components use `serverFetch` instead. */
 export const api: AxiosInstance = axios.create({
@@ -26,7 +28,7 @@ export const api: AxiosInstance = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = getAccessToken();
+  const token = currentAccessToken();
   if (token) config.headers.set('Authorization', `Bearer ${token}`);
   return config;
 });
@@ -34,7 +36,7 @@ api.interceptors.request.use((config) => {
 let refreshInFlight: Promise<AuthTokens | null> | null = null;
 
 async function refreshTokens(): Promise<AuthTokens | null> {
-  const refreshToken = getRefreshToken();
+  const refreshToken = currentRefreshToken();
   if (!refreshToken) return null;
   try {
     const { data } = await axios.post<AuthTokens>(
@@ -63,7 +65,7 @@ api.interceptors.response.use(
       original &&
       !original._retried &&
       !isRefreshCall &&
-      getRefreshToken()
+      currentRefreshToken()
     ) {
       original._retried = true;
       refreshInFlight ??= refreshTokens().finally(() => {

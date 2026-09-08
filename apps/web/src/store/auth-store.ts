@@ -8,6 +8,7 @@ import {
   persistTokens,
   persistUser,
   readSession,
+  syncCookieMirror,
 } from '@/lib/session';
 
 interface AuthState {
@@ -29,6 +30,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   hydrate: () => {
     const { tokens, user } = readSession();
+    if (tokens) {
+      // A fresh tab inherits the last session via cookie — claim it into this
+      // tab's own sessionStorage so it stays independent from here on.
+      if (user) persistSession(tokens, user);
+      else {
+        persistTokens(tokens);
+        syncCookieMirror();
+      }
+    }
     set({ tokens, user, hydrated: true });
   },
   setSession: (tokens, user) => {

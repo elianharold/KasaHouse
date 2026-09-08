@@ -127,7 +127,7 @@ export function useLogout() {
   const router = useRouter();
   return useCallback(
     async (redirectTo = '/') => {
-      const rt = getRefreshToken();
+      const rt = useAuthStore.getState().tokens?.refreshToken ?? getRefreshToken();
       if (rt) await authService.logout(rt).catch(() => undefined);
       clear();
       qc.clear();
