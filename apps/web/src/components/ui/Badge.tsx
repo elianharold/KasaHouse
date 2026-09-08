@@ -101,7 +101,7 @@ export function VerifiedTick({
       title={verified ? 'Ghana Card verified' : 'Ghana Card not verified'}
     >
       {verified ? <BadgeCheck className={icon} /> : null}
-      {verified ? 'Verified' : 'ID not verified'}
+      {verified ? 'Verified' : 'Not verified'}
     </span>
   );
 }

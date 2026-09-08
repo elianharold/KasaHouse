@@ -55,8 +55,8 @@ export default function RoleScreen() {
           role,
         });
       } else {
-        // Already signed in but somehow role-less, or adding a second role.
-        await updateProfile.mutateAsync({ addRole: role });
+        // Already signed in but role-less, or switching role.
+        await updateProfile.mutateAsync({ role });
       }
       // AuthGate redirects into the app once roles are set.
     } catch (err) {
@@ -68,7 +68,7 @@ export default function RoleScreen() {
     <Screen scroll className="flex-1 justify-center">
       <Text className="text-2xl font-bold text-ink">How will you use KasaHouse?</Text>
       <Text className="mt-2 text-base text-ink-muted">
-        You can switch or add the other role later in your profile.
+        You can switch to the other role any time in your profile.
       </Text>
 
       <View className="mt-8">

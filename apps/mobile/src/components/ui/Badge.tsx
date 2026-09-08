@@ -53,7 +53,7 @@ export function VerifiedTick({
           verified ? 'text-brand-dark' : 'text-ink-muted'
         }`}
       >
-        {verified ? '✓ Verified' : 'ID not verified'}
+        {verified ? '✓ Verified' : 'Not verified'}
       </Text>
     </View>
   );

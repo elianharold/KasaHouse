@@ -73,9 +73,12 @@ export function ListingCard({
         <p className="mt-0.5 line-clamp-1 text-sm text-ink-muted">
           {listing.location.area}, {listing.location.city}
         </p>
-        {listing.ownerVerified ? (
-          <VerifiedTick verified size="xs" className="mt-1.5 self-start" />
-        ) : null}
+        <VerifiedTick
+          verified={listing.ownerVerified}
+          size="xs"
+          showUnverified
+          className="mt-1.5 self-start"
+        />
         <div className="mt-auto flex items-center justify-between pt-3">
           <span className="text-base font-bold text-brand">
             {formatPrice(listing.price, listing.purpose, listing.rentPeriod)}

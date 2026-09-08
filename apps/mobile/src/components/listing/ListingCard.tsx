@@ -75,11 +75,9 @@ export function ListingCard({
             {listing.location.area}, {listing.location.city}
           </Text>
 
-          {listing.ownerVerified ? (
-            <View className="mt-1.5">
-              <VerifiedTick verified />
-            </View>
-          ) : null}
+          <View className="mt-1.5">
+            <VerifiedTick verified={listing.ownerVerified} showUnverified />
+          </View>
 
           <View className="mt-2 flex-row items-center justify-between">
             <Text className="text-base font-bold" style={{ color: colors.brand }}>

@@ -91,7 +91,7 @@ export default function ThreadScreen() {
                 <Text className="text-sm font-semibold text-ink" numberOfLines={1}>
                   {counterpartyName}
                 </Text>
-                <VerifiedTick verified={detail.counterparty.verified} />
+                <VerifiedTick verified={detail.counterparty.verified} showUnverified />
               </View>
               <Text className="text-xs text-ink-muted" numberOfLines={1}>
                 {detail.listingTitle} · view listing

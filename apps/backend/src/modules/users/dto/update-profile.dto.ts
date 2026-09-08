@@ -18,9 +18,5 @@ export class UpdateProfileDto implements UpdateProfilePayload {
 
   @IsOptional()
   @IsIn(ALL_USER_ROLES)
-  addRole?: UserRole;
-
-  @IsOptional()
-  @IsIn(ALL_USER_ROLES)
-  removeRole?: UserRole;
+  role?: UserRole;
 }

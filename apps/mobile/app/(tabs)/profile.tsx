@@ -40,11 +40,11 @@ function RoleToggle({
 }) {
   return (
     <Pressable
-      onPress={onPress}
-      disabled={disabled}
+      onPress={active ? undefined : onPress}
+      disabled={disabled || active}
       className={`flex-row items-center justify-between gap-3 rounded-xl border p-3 ${
         active ? 'border-brand/30 bg-brand-light/50' : 'border-[#E2E8E4]'
-      } ${disabled ? 'opacity-60' : ''}`}
+      } ${disabled && !active ? 'opacity-60' : ''}`}
     >
       <View className="flex-1">
         <Text className="text-sm font-medium text-ink">{label}</Text>
@@ -60,7 +60,7 @@ function RoleToggle({
             active ? 'text-white' : 'text-ink-muted'
           }`}
         >
-          {active ? 'On' : 'Off'}
+          {active ? 'Current' : 'Switch'}
         </Text>
       </View>
     </Pressable>
@@ -120,11 +120,9 @@ export default function ProfileScreen() {
     }
   };
 
-  const toggleRole = async (role: UserRole, active: boolean) => {
+  const selectRole = async (role: UserRole) => {
     try {
-      await updateProfile.mutateAsync(
-        active ? { removeRole: role } : { addRole: role },
-      );
+      await updateProfile.mutateAsync({ role });
     } catch (err) {
       Alert.alert('Could not update', toApiError(err).message);
     }
@@ -224,7 +222,7 @@ export default function ProfileScreen() {
       <View className="mt-6 rounded-2xl border border-[#E2E8E4] p-4">
         <Row label="Phone" value={user.phone ?? '—'} />
         <Row label="Email" value={user.email ?? '—'} />
-        <Row label="Roles" value={user.roles.join(' + ') || 'None'} />
+        <Row label="Role" value={user.roles.join(' + ') || 'None'} />
         <View className="flex-row items-center justify-between py-3">
           <Text className="text-sm text-ink-muted">ID verification</Text>
           <KycBadge status={user.kycStatus} />
@@ -251,27 +249,25 @@ export default function ProfileScreen() {
       </View>
 
       <View className="mt-6 rounded-2xl border border-[#E2E8E4] p-4">
-        <Text className="text-sm font-semibold text-ink">Your roles</Text>
+        <Text className="text-sm font-semibold text-ink">Your role</Text>
         <Text className="mb-3 mt-1 text-xs text-ink-muted">
-          Switch these on or off any time. Landlords list properties; tenants
-          browse and message owners. You can hold both.
+          You&apos;re one or the other — switch any time. Landlords list and
+          manage properties; tenants browse and message owners.
         </Text>
         <RoleToggle
           label="Landlord / seller"
           hint="List and manage properties."
-          active={isLandlord}
-          disabled={updateProfile.isPending || (isLandlord && !isTenant)}
-          onPress={() =>
-            toggleRole(UserRole.LANDLORD, isLandlord)
-          }
+          active={isLandlord && !isTenant}
+          disabled={updateProfile.isPending}
+          onPress={() => selectRole(UserRole.LANDLORD)}
         />
         <View className="h-2" />
         <RoleToggle
           label="Tenant / buyer"
           hint="Browse, save and message owners."
-          active={isTenant}
-          disabled={updateProfile.isPending || (isTenant && !isLandlord)}
-          onPress={() => toggleRole(UserRole.TENANT, isTenant)}
+          active={isTenant && !isLandlord}
+          disabled={updateProfile.isPending}
+          onPress={() => selectRole(UserRole.TENANT)}
         />
       </View>
 

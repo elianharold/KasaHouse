@@ -45,8 +45,7 @@ export class UsersService {
     userId: string,
     patch: {
       fullName?: string;
-      addRole?: UserRole;
-      removeRole?: UserRole;
+      role?: UserRole;
       email?: string;
     },
   ): Promise<User> {
@@ -56,25 +55,12 @@ export class UsersService {
     const data: { fullName?: string; roles?: UserRole[]; email?: string } = {};
     if (patch.fullName !== undefined) data.fullName = patch.fullName.trim();
 
-    let roles = current.roles as UserRole[];
-    if (patch.addRole && !roles.includes(patch.addRole)) {
-      roles = [...roles, patch.addRole];
-    }
-    if (patch.removeRole && roles.includes(patch.removeRole)) {
-      const next = roles.filter((r) => r !== patch.removeRole);
-      if (next.length === 0) {
-        throw new DomainException(
-          'LAST_ROLE',
-          'Keep at least one role — add the other role before removing this one.',
-        );
-      }
-      roles = next;
-    }
+    // An account holds exactly one role; setting it replaces whatever was there.
     if (
-      roles.length !== current.roles.length ||
-      roles.some((r) => !current.roles.includes(r))
+      patch.role &&
+      (current.roles.length !== 1 || current.roles[0] !== patch.role)
     ) {
-      data.roles = roles;
+      data.roles = [patch.role];
     }
 
     if (patch.email !== undefined) {

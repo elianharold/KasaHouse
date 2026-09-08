@@ -67,7 +67,7 @@ export default function MessagesScreen() {
                 >
                   {item.counterparty.fullName ?? 'KasaHouse member'}
                 </Text>
-                <VerifiedTick verified={item.counterparty.verified} />
+                <VerifiedTick verified={item.counterparty.verified} showUnverified />
               </View>
               <Text className="text-xs text-ink-muted" numberOfLines={1}>
                 {item.listingTitle}

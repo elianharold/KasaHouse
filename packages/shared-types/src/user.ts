@@ -30,7 +30,7 @@ export interface User {
   fullName: string | null;
   /** True once the account has set a password (enables the fast email+password login). */
   hasPassword: boolean;
-  /** A single account can hold both roles. */
+  /** An account holds exactly one role at a time; switch it in the profile. */
   roles: UserRole[];
   kycStatus: KycStatus;
   createdAt: ISODateString;
@@ -51,8 +51,6 @@ export interface UpdateProfilePayload {
   fullName?: string;
   /** Link an email to the account (enables password login + email codes). */
   email?: string;
-  /** Add a role the account does not yet hold. */
-  addRole?: UserRole;
-  /** Drop a role from the account. The account must keep at least one role. */
-  removeRole?: UserRole;
+  /** Set the account's role. An account holds exactly one role at a time. */
+  role?: UserRole;
 }

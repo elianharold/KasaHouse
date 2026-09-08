@@ -300,7 +300,7 @@ export function SignInFlow() {
 
       {step === 'role' && (
         <div className="mt-6">
-          <p className="text-sm text-ink-muted">You can add the other role later in your profile.</p>
+          <p className="text-sm text-ink-muted">You can switch to the other role later in your profile.</p>
           <div className="mt-4 space-y-3">
             {[
               {

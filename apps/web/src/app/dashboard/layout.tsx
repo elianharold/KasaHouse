@@ -29,16 +29,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (user && !isLandlord) {
     return (
       <Container size="narrow" className="py-16 text-center">
-        <h1 className="text-xl font-semibold text-ink">Become a landlord to list a property</h1>
+        <h1 className="text-xl font-semibold text-ink">Switch to a landlord account to list</h1>
         <p className="mt-2 text-sm text-ink-muted">
-          Your account is set up as a tenant/buyer. Add the landlord role to post listings.
+          Your account is set up as a tenant/buyer. Switch it to landlord/seller
+          to post listings — you can switch back any time in your profile.
         </p>
         <div className="mt-6">
           <Button
             loading={updateProfile.isPending}
-            onClick={() => updateProfile.mutate({ addRole: UserRole.LANDLORD })}
+            onClick={() => updateProfile.mutate({ role: UserRole.LANDLORD })}
           >
-            Add landlord role
+            Switch to landlord
           </Button>
         </div>
       </Container>

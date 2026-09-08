@@ -66,9 +66,11 @@ export default function MessagesPage() {
                     <p className="truncate text-sm font-semibold text-ink">
                       {t.counterparty.fullName ?? 'KasaHouse member'}
                     </p>
-                    {t.counterparty.verified ? (
-                      <VerifiedTick verified size="xs" />
-                    ) : null}
+                    <VerifiedTick
+                      verified={t.counterparty.verified}
+                      size="xs"
+                      showUnverified
+                    />
                     <PurposeBadge purpose={t.listingPurpose} className="scale-90" />
                   </div>
                   <p className="truncate text-xs text-ink-muted">{t.listingTitle}</p>
