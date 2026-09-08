@@ -145,8 +145,8 @@ export function ChatConversation({ thread }: { thread: ChatThreadDetail }) {
                   </div>
                 </div>
 
-                {/* potent read status — once, under the viewer's latest message */}
                 {m.mine && i === lastMineIdx ? (
+                  /* potent read status — once, under the viewer's latest message */
                   <div className="mt-1 flex justify-end pr-1">
                     {m.readAt ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-brand/12 px-2 py-0.5 text-[11px] font-semibold text-brand-dark">
@@ -160,7 +160,19 @@ export function ChatConversation({ thread }: { thread: ChatThreadDetail }) {
                       </span>
                     )}
                   </div>
-                ) : null}
+                ) : (
+                  /* every other message carries its own send time */
+                  <div
+                    className={cn(
+                      'mt-0.5 flex px-1',
+                      m.mine ? 'justify-end pr-1' : 'justify-start pl-9',
+                    )}
+                  >
+                    <span className="text-[10px] tabular-nums text-ink-faint">
+                      {messageTime(m.sentAt)}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })

@@ -183,7 +183,17 @@ export default function ThreadScreen() {
                         </Text>
                       )}
                     </View>
-                  ) : null}
+                  ) : (
+                    <View
+                      className={`mt-0.5 flex-row px-1 ${
+                        item.mine ? 'justify-end pr-1' : 'justify-start pl-9'
+                      }`}
+                    >
+                      <Text className="text-[10px] text-ink-faint">
+                        {messageTime(item.sentAt)}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               );
             }}
